@@ -1,0 +1,66 @@
+# Copyright 2020, TeamDev. All rights reserved.
+#
+# Redistribution and use in source and/or binary forms, with or without
+# modification, must retain the above copyright notice and the following
+# disclaimer.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+require 'singleton'
+
+module Jekyll
+  module Commands
+    # The configuration of the plugin.
+    #
+    class Configuration
+      include Singleton
+
+      DEFAULT_INTERLAYER = '...'
+      DEFAULT_FRAGMENTS_DIR = ".fragments"
+      DEFAULT_INCLUDE = ["**/*"]
+
+
+      # A root directory of the source code to be embedded
+      attr_reader :code_root
+
+      # A root directory of the documentation files
+      attr_reader :documentation_root
+
+      # A list of patterns filtering the code files to be considered.
+      #
+      # For example, ["**/*.java", "**/*.gradle"]. The default value is "**/*".
+      #
+      attr_reader :code_includes
+
+      # A directory for the fragmentized code is stored. A temporary directory that should not be
+      # tracked VCS.
+      attr_reader :fragments_dir
+
+      # A string that's inserted between multiple occurrences of the same fragment.
+      #
+      # The default value is: "..." (three dots)
+      attr_reader :interlayer
+
+      def initialize
+        yaml = Jekyll.configuration({})['embed_code']
+
+        @code_root = yaml['code_root']
+        @documentation_root = yaml['documentation_root']
+        @code_includes = (yaml['code_includes'] or DEFAULT_INCLUDE)
+        @fragments_dir = (yaml['fragments_dir'] or DEFAULT_FRAGMENTS_DIR)
+        @interlayer = (yaml['interlayer'] or DEFAULT_INTERLAYER)
+      end
+
+    end
+  end
+end
