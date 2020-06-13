@@ -70,6 +70,7 @@ joined together and interlaid with a special interlaying text (see [Configuratio
 Here is an example of how a re-occurring fragment is rendered.
 
 **Code:**
+
 ```java
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence {
