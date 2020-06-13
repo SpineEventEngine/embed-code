@@ -169,7 +169,7 @@ You can change these settings in the very place they're defined: [../_config.yml
 
 For example:
 ```yaml
-code_embedding:
+embed_code:
   code_root: ./_samples                   # The directory that will be recursively scanned for sample code files.
   code_includes: "**/*.java,**/*.gradle"  # The rules defining which code files to consider.
   documentation_root: ./docs              # The directory with the Markdown to be processed.
