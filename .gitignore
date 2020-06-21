@@ -64,3 +64,4 @@ _site/
 
 !.idea/copyright
 .idea
+**/*.iml
