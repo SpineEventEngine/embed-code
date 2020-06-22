@@ -28,7 +28,7 @@ module Jekyll
     class EmbeddingProcessor
 
       # @param [String] markdown_file the path to the markdown file
-      def initialize(markdown_file = "")
+      def initialize(markdown_file = '')
         @markdown_file = markdown_file
       end
 
@@ -55,12 +55,12 @@ module Jekyll
             end
           end
           unless accepted
-            raise StandardError.new "Failed to parse the file"
+            raise StandardError, "Failed to parse the doc file `#{@markdown_file}`."
           end
         end
 
         if context.file_contains_embedding
-          IO.write(@markdown_file, context.result.join(""))
+          IO.write(@markdown_file, context.result.join(''))
         end
       end
     end
@@ -131,7 +131,7 @@ module Jekyll
           end
         end
         unless context.embedding
-          raise StandardError.new "Failed to parse an embedding instruction"
+          raise StandardError, "Failed to parse an embedding instruction"
         end
       end
     end
@@ -223,23 +223,23 @@ module Jekyll
     end
 
     STATE_TO_TRANSITION = {
-        :REGULAR_LINE => RegularLine.new,
-        :EMBEDDING_INSTRUCTION => EmbedInstructionToken.new,
-        :CODE_FENCE_START => CodeFenceStart.new,
-        :CODE_FENCE_END => CodeFenceEnd.new,
-        :CODE_SAMPLE_LINE => CodeSampleLine.new,
-        :FINISH => Finish.new
-    }
+        REGULAR_LINE: RegularLine.new,
+        EMBEDDING_INSTRUCTION: EmbedInstructionToken.new,
+        CODE_FENCE_START: CodeFenceStart.new,
+        CODE_FENCE_END: CodeFenceEnd.new,
+        CODE_SAMPLE_LINE: CodeSampleLine.new,
+        FINISH: Finish.new
+    }.freeze
 
     # A simple grammar of the Markdown file that consists of the regular lines and the embedding instructions followed
     # by the code fences (empty or non-empty).
     TRANSITIONS = {
-        :START => [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
-        :REGULAR_LINE => [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
-        :EMBEDDING_INSTRUCTION => [:CODE_FENCE_START],
-        :CODE_FENCE_START => [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
-        :CODE_SAMPLE_LINE => [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
-        :CODE_FENCE_END => [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE]
-    }
+        START: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
+        REGULAR_LINE: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
+        EMBEDDING_INSTRUCTION: [:CODE_FENCE_START],
+        CODE_FENCE_START: [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
+        CODE_SAMPLE_LINE: [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
+        CODE_FENCE_END: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE]
+    }.freeze
   end
 end

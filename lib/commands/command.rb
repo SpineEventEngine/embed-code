@@ -24,35 +24,45 @@ require_relative('configuration')
 #   bundle exec jekyll embedCodeSamples
 #
 
-module Jekyll
-  module Commands
-    class EmbedCodeSamples < Command
+module Jekyll::Commands
 
-      def self.init_with_program(prog)
-        prog.command(:embedCodeSamples) do |c|
-          c.syntax "embedCode"
-          c.description "Embeds sample code to Markdown files"
+  # Command which updates code embeddings in the documentation files.
+  class EmbedCodeSamples < Command
 
-          c.action { |args, options| process(args, options) }
+    def self.init_with_program(prog)
+      prog.command(:embedCodeSamples) do |c|
+        c.syntax 'embedCode'
+        c.description 'Embeds sample code to Markdown files'
+        c.action { |_, __| process }
+      end
+    end
+
+    def self.process
+      configuration = Configuration.instance
+      write_code_fragments(configuration)
+      embed_code_fragments(configuration)
+    end
+
+    private
+
+    def write_code_fragments(configuration)
+      includes = configuration.code_includes
+      code_root = configuration.code_root
+      includes.each do |rule|
+        pattern = "#{code_root}/#{rule}"
+        Dir.glob(pattern) do |code_file|
+          Fragmentation.new(code_file).write_fragments
         end
       end
+    end
 
-      def self.process(args = [], options = {})
-        configuration = Configuration.instance
-
-        includes = configuration.code_includes
-        code_root = configuration.code_root
-        includes.each do |rule|
-          pattern = "#{code_root}/#{rule}"
-          Dir.glob(pattern) do |code_file|
-            Fragmentation.new(code_file).write_fragments
-          end
-        end
-
-        documentation_root = configuration.documentation_root
-        Dir.glob("#{documentation_root}/**/*.md") { |documentation_file|
+    def embed_code_fragments(configuration)
+      documentation_root = configuration.documentation_root
+      doc_patterns = configuration.doc_includes
+      doc_patterns.each do |pattern|
+        Dir.glob("#{documentation_root}/#{pattern}") do |documentation_file|
           EmbeddingProcessor.new(documentation_file).embed
-        }
+        end
       end
     end
   end

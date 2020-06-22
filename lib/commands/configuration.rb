@@ -19,53 +19,63 @@
 require 'jekyll'
 require 'singleton'
 
-module Jekyll
-  module Commands
-    # The configuration of the plugin.
+module Jekyll::Commands
+  # The configuration of the plugin.
+  #
+  class Configuration
+    include Singleton
+
+    DEFAULT_INTERLAYER = '...'.freeze
+    DEFAULT_FRAGMENTS_DIR = '.fragments'.freeze
+    DEFAULT_INCLUDE = ['**/*'].freeze
+    DEFAULT_DOC_INCLUDES = ['**/*.md', '**/*.html'].freeze
+
+
+    # A root directory of the source code to be embedded
+    attr_reader :code_root
+
+    # A root directory of the documentation files
+    attr_reader :documentation_root
+
+    # A list of patterns filtering the code files to be considered.
     #
-    class Configuration
-      include Singleton
+    # Directories are never matched by these patterns.
+    #
+    # For example, ["**/*.java", "**/*.gradle"]. The default value is "**/*".
+    #
+    attr_reader :code_includes
 
-      DEFAULT_INTERLAYER = '...'
-      DEFAULT_FRAGMENTS_DIR = ".fragments"
-      DEFAULT_INCLUDE = ["**/*"]
+    # A list of patterns filtering files in which we should look for embedding instructions.
+    #
+    # The patterns are resolved relatively to the `documentation_root`.
+    #
+    # Directories are never matched by these patterns.
+    #
+    # For example, ["docs/**/*.md", "guides/*.html"]. The default value is
+    # ["**/*.md", "**/*.html"].
+    #
+    attr_reader :doc_includes
 
+    # A directory for the fragmentized code is stored. A temporary directory that should not be
+    # tracked VCS.
+    attr_reader :fragments_dir
 
-      # A root directory of the source code to be embedded
-      attr_reader :code_root
+    # A string that's inserted between multiple occurrences of the same fragment.
+    #
+    # The default value is: "..." (three dots)
+    attr_reader :interlayer
 
-      # A root directory of the documentation files
-      attr_reader :documentation_root
-
-      # A list of patterns filtering the code files to be considered.
-      #
-      # Directories are never matched by these patterns.
-      #
-      # For example, ["**/*.java", "**/*.gradle"]. The default value is "**/*".
-      #
-      attr_reader :code_includes
-
-      # A directory for the fragmentized code is stored. A temporary directory that should not be
-      # tracked VCS.
-      attr_reader :fragments_dir
-
-      # A string that's inserted between multiple occurrences of the same fragment.
-      #
-      # The default value is: "..." (three dots)
-      attr_reader :interlayer
-
-      def initialize
-        yaml = Jekyll.configuration({})['embed_code']
-        if yaml.nil?
-          raise 'Unable to read Jekyll configuration.'
-        end
-        @code_root = yaml['code_root']
-        @documentation_root = yaml['documentation_root']
-        @code_includes = (yaml['code_includes'] or DEFAULT_INCLUDE)
-        @fragments_dir = (yaml['fragments_dir'] or DEFAULT_FRAGMENTS_DIR)
-        @interlayer = (yaml['interlayer'] or DEFAULT_INTERLAYER)
+    def initialize
+      yaml = Jekyll.configuration({})['embed_code']
+      if yaml.nil?
+        raise 'Unable to read Jekyll configuration.'
       end
-
+      @code_root = yaml['code_root']
+      @documentation_root = yaml['documentation_root']
+      @code_includes = (yaml['code_includes'] or DEFAULT_INCLUDE)
+      @doc_includes = (yaml['doc_includes'] or DEFAULT_DOC_INCLUDES)
+      @fragments_dir = (yaml['fragments_dir'] or DEFAULT_FRAGMENTS_DIR)
+      @interlayer = (yaml['interlayer'] or DEFAULT_INTERLAYER)
     end
   end
 end

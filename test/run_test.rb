@@ -16,9 +16,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-base_dir = File.expand_path(File.join(File.dirname(__FILE__), ".."))
-lib_dir  = File.join(base_dir, "lib")
-test_dir = File.join(base_dir, "test")
+base_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+lib_dir  = File.join(base_dir, 'lib')
+test_dir = File.join(base_dir, 'test')
 
 $LOAD_PATH.unshift(lib_dir)
 
