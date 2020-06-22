@@ -18,4 +18,5 @@
 
 source 'https://rubygems.org'
 
-gem "nokogiri", "~> 1.10"
+gem 'jekyll', '~> 3.8'
+gem 'nokogiri', '~> 1.10'
