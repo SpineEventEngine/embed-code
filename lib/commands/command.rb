@@ -44,9 +44,9 @@ module Jekyll
         code_root = configuration.code_root
         includes.each do |rule|
           pattern = "#{code_root}/#{rule}"
-          Dir.glob(pattern) { |code_file|
+          Dir.glob(pattern) do |code_file|
             Fragmentation.new(code_file).write_fragments
-          }
+          end
         end
 
         documentation_root = configuration.documentation_root

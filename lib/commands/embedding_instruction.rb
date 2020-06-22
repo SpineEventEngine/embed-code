@@ -16,7 +16,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require_relative('fragmentation')
+require 'nokogiri'
+require 'jekyll'
+
+require_relative 'fragmentation'
 
 module Jekyll
   module Commands
@@ -39,17 +42,16 @@ module Jekyll
         @fragment = values['fragment']
       end
 
-      # Reads the instruction from the '<?embed-code?>' XML tag (technically, it's a processing instruction, not a tag).
+      # Reads the instruction from the '<?embed-code?>' XML instruction.
       #
       def self.from_xml(line)
-        begin
-          document = Nokogiri.XML(line)
-          tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
-          fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
-          return EmbeddingInstruction.new(fields)
-        rescue
-          return nil
-        end
+        document = Nokogiri::XML(line)
+        tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
+        fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
+        EmbeddingInstruction.new(fields)
+      rescue StandardError => e
+        puts e
+        nil
       end
 
       # Reads the specified fragment from the code.
@@ -89,18 +91,22 @@ module Jekyll
       end
     end
   end
+end
 
-  # Extends Nokogiri's class with 'to_element' method.
-  #
-  class Nokogiri::XML::ProcessingInstruction
+module Nokogiri
+  module XML
+    # Extends Nokogiri's class with 'to_element' method.
+    #
+    class ProcessingInstruction
 
-    # Creates new element based on the content of this processing instruction.
-    #
-    # Processing instruction don't have attributes, their content is treated as a raw string value. We need to parse
-    # it as an Element to gain programmatic access to the attributes.
-    #
-    def to_element
-      document.parse("<#{name} #{content}/>")[0]
+      # Creates new element based on the content of this processing instruction.
+      #
+      # Processing instruction don't have attributes, their content is treated as a raw string value. We need to parse
+      # it as an Element to gain programmatic access to the attributes.
+      #
+      def to_element
+        document.parse("<#{name} #{content}/>")[0]
+      end
     end
   end
 end

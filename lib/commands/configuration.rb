@@ -16,6 +16,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'jekyll'
 require 'singleton'
 
 module Jekyll
@@ -38,6 +39,8 @@ module Jekyll
 
       # A list of patterns filtering the code files to be considered.
       #
+      # Directories are never matched by these patterns.
+      #
       # For example, ["**/*.java", "**/*.gradle"]. The default value is "**/*".
       #
       attr_reader :code_includes
@@ -53,7 +56,9 @@ module Jekyll
 
       def initialize
         yaml = Jekyll.configuration({})['embed_code']
-
+        if yaml.nil?
+          raise 'Unable to read Jekyll configuration.'
+        end
         @code_root = yaml['code_root']
         @documentation_root = yaml['documentation_root']
         @code_includes = (yaml['code_includes'] or DEFAULT_INCLUDE)
