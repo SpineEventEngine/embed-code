@@ -78,14 +78,14 @@ module Jekyll::Commands
     end
 
     def from_file
-      FileConfiguration.instance.configuration
+      FileConfiguration.instance.config
     end
   end
 
   class FileConfiguration
     include Singleton
 
-    attr_reader configuration
+    attr_reader :config
 
     def initialize
       yaml = Jekyll.configuration({})['embed_code']

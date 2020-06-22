@@ -18,12 +18,20 @@
 
 require 'test/unit'
 require_relative '../../lib/commands/embedding_instruction'
+require_relative '../../lib/commands/configuration'
 
 class EmbeddingInstructionTest < Test::Unit::TestCase
 
   def test_parse_from_xml
     xml = '<?embed-code file="foo" fragment="bar"?>'
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml)
+    yaml_like_hash = {
+      'embed_code' => {
+        'code_root': './',
+        'documentation_root': './'
+      }
+    }
+    configuration = Jekyll::Commands::Configuration.new(yaml_like_hash)
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
     puts instruction.content
   end
 

@@ -44,6 +44,8 @@ module Jekyll::Commands
 
     # Reads the instruction from the '<?embed-code?>' XML instruction.
     #
+    # @param [Object] line
+    # @param [Configuration] configuration
     def self.from_xml(line, configuration)
       document = Nokogiri::XML(line)
       tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
@@ -76,7 +78,8 @@ module Jekyll::Commands
       if @fragment
         result = []
         (0..100).each do |fragment_index|
-          fragment_content = FragmentFile.new(@code_file, @fragment, fragment_index).content
+          file = FragmentFile.new(@code_file, @fragment, @configuration, fragment_index)
+          fragment_content = file.content
           if fragment_content
             result.push(fragment_content)
           else
@@ -85,7 +88,7 @@ module Jekyll::Commands
         end
         result
       else
-        fragment_file = FragmentFile.new(@code_file, Fragment::DEFAULT_FRAGMENT, nil)
+        fragment_file = FragmentFile.new(@code_file, Fragment::DEFAULT_FRAGMENT, @configuration, nil)
         [fragment_file.content]
       end
     end

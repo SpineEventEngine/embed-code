@@ -239,11 +239,13 @@ module Jekyll::Commands
 
     # @param [string] code_file a relative path to a code file
     # @param [string] fragment_name a name of the fragment in the code file
+    # @param [Configuration] configuration the embedding configuration
     # @param [string] fragment_index an index of the fragment occurrence in the file
-    def initialize(code_file, fragment_name, fragment_index = nil)
+    def initialize(code_file, fragment_name, configuration, fragment_index = nil)
       @code_file = code_file
       @fragment_name = fragment_name
       @fragment_index = fragment_index
+      @configuration = configuration
     end
 
     # Composes a FragmentFile for the given fragment in the given code file.
@@ -255,7 +257,7 @@ module Jekyll::Commands
       code_file = Pathname.new(code_file)
       code_root = File.expand_path(@configuration.code_root)
       relative_path = code_file.relative_path_from code_root
-      return FragmentFile.new(relative_path.to_s, fragment_name, fragment_index.to_s)
+      return FragmentFile.new(relative_path.to_s, fragment_name, @configuration, fragment_index.to_s)
     end
 
     # Obtains the absolute path to this fragment file
