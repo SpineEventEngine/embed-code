@@ -23,13 +23,11 @@ module Jekyll::Commands
   # The configuration of the plugin.
   #
   class Configuration
-    include Singleton
 
     DEFAULT_INTERLAYER = '...'.freeze
     DEFAULT_FRAGMENTS_DIR = '.fragments'.freeze
     DEFAULT_INCLUDE = ['**/*'].freeze
     DEFAULT_DOC_INCLUDES = ['**/*.md', '**/*.html'].freeze
-
 
     # A root directory of the source code to be embedded
     attr_reader :code_root
@@ -65,10 +63,11 @@ module Jekyll::Commands
     # The default value is: "..." (three dots)
     attr_reader :interlayer
 
-    def initialize
-      yaml = Jekyll.configuration({})['embed_code']
+    def initialize(yaml_config)
+      yaml = yaml_config['embed_code']
       if yaml.nil?
-        raise 'Unable to read Jekyll configuration.'
+        raise 'Missing Jekyll configuration. A minimal `embed_code` section should be present in' \
+              '`_config.yml`.'
       end
       @code_root = yaml['code_root']
       @documentation_root = yaml['documentation_root']
@@ -76,6 +75,21 @@ module Jekyll::Commands
       @doc_includes = (yaml['doc_includes'] or DEFAULT_DOC_INCLUDES)
       @fragments_dir = (yaml['fragments_dir'] or DEFAULT_FRAGMENTS_DIR)
       @interlayer = (yaml['interlayer'] or DEFAULT_INTERLAYER)
+    end
+
+    def from_file
+      FileConfiguration.instance.configuration
+    end
+  end
+
+  class FileConfiguration
+    include Singleton
+
+    attr_reader configuration
+
+    def initialize
+      yaml = Jekyll.configuration({})['embed_code']
+      @configuration = Configuration.new yaml
     end
   end
 end

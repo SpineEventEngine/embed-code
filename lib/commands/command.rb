@@ -38,7 +38,7 @@ module Jekyll::Commands
     end
 
     def self.process
-      configuration = Configuration.instance
+      configuration = Configuration.from_file
       write_code_fragments(configuration)
       embed_code_fragments(configuration)
     end
@@ -51,7 +51,7 @@ module Jekyll::Commands
       includes.each do |rule|
         pattern = "#{code_root}/#{rule}"
         Dir.glob(pattern) do |code_file|
-          Fragmentation.new(code_file).write_fragments
+          Fragmentation.new(code_file, configuration).write_fragments
         end
       end
     end

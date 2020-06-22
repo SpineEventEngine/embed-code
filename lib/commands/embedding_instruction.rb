@@ -33,21 +33,22 @@ module Jekyll::Commands
   # the whole file is embedded.
   #
   class EmbeddingInstruction
-    STATEMENT = '<?embed-code'
-    TAG_NAME = 'embed-code'
+    STATEMENT = '<?embed-code'.freeze
+    TAG_NAME = 'embed-code'.freeze
 
-    def initialize(values)
+    def initialize(values, configuration)
       @code_file = values['file']
       @fragment = values['fragment']
+      @configuration = configuration
     end
 
     # Reads the instruction from the '<?embed-code?>' XML instruction.
     #
-    def self.from_xml(line)
+    def self.from_xml(line, configuration)
       document = Nokogiri::XML(line)
       tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
       fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
-      EmbeddingInstruction.new(fields)
+      EmbeddingInstruction.new(fields, configuration)
     rescue StandardError => e
       puts e
       nil
@@ -58,7 +59,7 @@ module Jekyll::Commands
     # If the fragment appears more than once in a file, the occurrences are interlayed with Configuration::interlayer.
     #
     def content
-      interlayer = Configuration.instance.interlayer
+      interlayer = @configuration.interlayer
       lines = []
       read_fragments.each do |content|
         if lines.any?

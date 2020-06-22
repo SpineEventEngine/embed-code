@@ -43,17 +43,18 @@ module Jekyll::Commands
   # Even if no fragments are defined explicitly, the whole file is always a fragment on its own.
   #
   class Fragmentation
-    FRAGMENT_START = "#docfragment"
-    FRAGMENT_END = "#enddocfragment"
+    FRAGMENT_START = '#docfragment'.freeze
+    FRAGMENT_END = '#enddocfragment'.freeze
 
     # Creates fragmentation of the given file
     #
     # @param [Object] code_file a full path of a file to fragment
-    def initialize(code_file = "")
+    def initialize(code_file, configuration)
       unless code_file
-        raise ArgumentError.new "Failed to create Fragmentation"
+        raise ArgumentError, 'Failed to create Fragmentation'
       end
-      @sources_root = File.expand_path(Configuration.instance.code_root)
+      @configuration = configuration
+      @sources_root = File.expand_path(configuration.code_root)
       @code_file = File.expand_path(code_file)
     end
 
@@ -118,8 +119,8 @@ module Jekyll::Commands
     end
 
     def target_directory
-      fragments_dir = Configuration.instance.fragments_dir
-      code_root = File.expand_path(Configuration.instance.code_root)
+      fragments_dir = @configuration.fragments_dir
+      code_root = File.expand_path(@configuration.code_root)
       relative_file = Pathname.new(@code_file).relative_path_from(code_root).to_s
       sub_tree = File.dirname(relative_file)
       File.join(fragments_dir, sub_tree)
@@ -251,16 +252,16 @@ module Jekyll::Commands
     # @param [string] fragment the fragment
     # @param [integer] fragment_index an index of the fragment occurrence in the file
     def self.from_absolute_file(code_file, fragment_name, fragment_index)
-      code_file = Pathname.new code_file
-      code_root = File.expand_path Configuration.instance.code_root
+      code_file = Pathname.new(code_file)
+      code_root = File.expand_path(@configuration.code_root)
       relative_path = code_file.relative_path_from code_root
-      return FragmentFile.new(relative_path.to_s, fragment_name, fragment_index)
+      return FragmentFile.new(relative_path.to_s, fragment_name, fragment_index.to_s)
     end
 
     # Obtains the absolute path to this fragment file
     def absolute_path
       file_extension = File.extname(@code_file)
-      fragments_dir = File.expand_path(Configuration.instance.fragments_dir)
+      fragments_dir = File.expand_path(@configuration.fragments_dir)
 
       if @fragment_name == Fragment::DEFAULT_FRAGMENT
         File.join(fragments_dir, @code_file)
