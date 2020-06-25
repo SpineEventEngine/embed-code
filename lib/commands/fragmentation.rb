@@ -163,7 +163,7 @@ module Jekyll::Commands
   #
   class FragmentBuilder
 
-    def initialize(name = "")
+    def initialize(name = '')
       unless name
         raise ArgumentError.new "Can't create fragment without a name"
       end
@@ -178,9 +178,9 @@ module Jekyll::Commands
     # @param [Integer] start_position a starting position of the fragment
     def add_start_position(start_position = 0)
       if @occurrences.last and not @occurrences.last.end_position
-        raise ArgumentError.new "Overlapping fragment detected: " + @name
+        raise ArgumentError, "Overlapping fragment detected: `#{name}`."
       end
-      occurrence = OpenStruct.new("start_position" => start_position, "end_position" => nil)
+      occurrence = OpenStruct.new('start_position' => start_position, 'end_position' => nil)
       @occurrences.push(occurrence)
       self
     end
@@ -192,7 +192,7 @@ module Jekyll::Commands
     # @param [Integer] end_position an end position position of the fragment
     def add_end_position(end_position = 0)
       last = @occurrences.last
-      if not last or (last and last.end_position)
+      if not last or last.end_position
         raise ArgumentError, 'Unexpected #enddocfragment statement'
       end
       last.end_position = end_position
@@ -209,11 +209,11 @@ module Jekyll::Commands
   # A single fragment in a file
   #
   class Fragment
-    DEFAULT_FRAGMENT = "_default"
+    DEFAULT_FRAGMENT = '_default'
 
-    def initialize(name = "", occurrences = [])
+    def initialize(name = '', occurrences = [])
       unless name and occurrences
-        raise ArgumentError.new "Can't create a fragment"
+        raise ArgumentError, "Can't create a fragment"
       end
       @occurrences = occurrences
       @name = name
@@ -279,18 +279,16 @@ module Jekyll::Commands
     # @return contents of the file or nil if it doesn't exist
     def content
       path = absolute_path
-      if File.exist?(path)
-        File.readlines(path)
-      else
-        nil
-      end
+      raise "Fragment file `#{path}` not found." unless File.exist?(path)
+
+      File.readlines(path)
     end
 
     # Writes contents to the file.
     #
     # Overwrites the file if it exists.
     def write(content)
-      File.open(absolute_path, "w+") do |f|
+      File.open(absolute_path, 'w+') do |f|
         indentation = find_minimal_indentation(content)
         content.each { |line|
           f.puts(line[indentation..-1])
