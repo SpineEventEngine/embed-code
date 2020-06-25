@@ -16,27 +16,30 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'test/unit'
-require_relative '../../lib/commands/embedding_instruction'
-require_relative '../../lib/commands/configuration'
-require_relative './given/test_env'
+def config_with_prepared_fragments
+  create_configuration(true)
+end
 
-class EmbeddingInstructionTest < Test::Unit::TestCase
+def config
+  create_configuration(false)
+end
 
-  def test_parse_from_xml
-    xml = build_instruction 'org/example/Hello.java', 'Hello class'
-    configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
-    assert_not_nil(instruction)
-  end
+def build_instruction(file_name, fragment = nil)
+  fragment_attr = fragment ? "fragment=\"#{fragment}\"" : ''
+  "<?embed-code file=\"#{file_name}\" #{fragment_attr}?>"
+end
 
-  def test_read_fragment_dir
-    xml = build_instruction 'org/example/Hello.java'
-    configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
-    lines = instruction.content
-    assert_not_nil(lines)
-    assert_equal(28, lines.size)
-    assert_equal("public class Hello {\n", lines[22])
-  end
+private
+
+def create_configuration(prepared_fragments)
+  fragments_dir = prepared_fragments ? './test/prepared-fragments' : './test/fragments'
+  # noinspection RubyStringKeysInHashInspection
+  yaml_like_hash = {
+    'embed_code' => {
+      'code_root' => './test/code',
+      'fragments_dir' => fragments_dir,
+      'documentation_root' => './'
+    }
+  }
+  Jekyll::Commands::Configuration.new(yaml_like_hash)
 end

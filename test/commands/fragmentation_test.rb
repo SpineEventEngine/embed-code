@@ -17,26 +17,36 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'test/unit'
+require 'fileutils'
 require_relative '../../lib/commands/embedding_instruction'
 require_relative '../../lib/commands/configuration'
 require_relative './given/test_env'
 
-class EmbeddingInstructionTest < Test::Unit::TestCase
+class FragmentationTest < Test::Unit::TestCase
 
-  def test_parse_from_xml
-    xml = build_instruction 'org/example/Hello.java', 'Hello class'
-    configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
-    assert_not_nil(instruction)
+  def test_fragmentize_file
+    configuration = config
+    file_name = 'Hello.java'
+    path = "#{configuration.code_root}/org/example/#{file_name}"
+    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation.write_fragments
+
+    fragment_children = Dir.children(configuration.fragments_dir)
+    assert_equal 1, fragment_children.size
+    assert_equal 'org', fragment_children[0]
+
+    fragment_files = Dir.children("#{configuration.fragments_dir}/org/example")
+
+    assert_equal 4, fragment_files.size
+    # Check "default" fragment exists.
+    assert fragment_files.include? file_name
+
+    fragment_files.each do |file|
+      assert_match(/Hello-\w+-\d+\.java/, file) unless file == file_name
+    end
   end
 
-  def test_read_fragment_dir
-    xml = build_instruction 'org/example/Hello.java'
-    configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
-    lines = instruction.content
-    assert_not_nil(lines)
-    assert_equal(28, lines.size)
-    assert_equal("public class Hello {\n", lines[22])
+  def teardown
+    FileUtils.rm_r config.fragments_dir, secure: true
   end
 end
