@@ -19,7 +19,7 @@
 require 'ostruct'
 require 'fileutils'
 require 'digest/sha1'
-require_relative('configuration')
+require_relative 'configuration'
 
 module Jekyll::Commands
 
@@ -69,11 +69,11 @@ module Jekyll::Commands
 
       fragments.values.each do |fragment|
         if fragment.is_default?
-          file = FragmentFile.from_absolute_file(@code_file, fragment.name, nil)
+          file = FragmentFile.from_absolute_file(@code_file, fragment.name, nil, @configuration)
           file.write(content)
         else
           fragment.occurrences.each_with_index do |occurrence, index|
-            file = FragmentFile.from_absolute_file(@code_file, fragment.name, index)
+            file = FragmentFile.from_absolute_file(@code_file, fragment.name, index, @configuration)
             fragment_content = content[occurrence.start_position..occurrence.end_position]
             file.write(fragment_content)
           end
@@ -253,11 +253,11 @@ module Jekyll::Commands
     # @param [string] code_file an absolute path to a code file
     # @param [string] fragment the fragment
     # @param [integer] fragment_index an index of the fragment occurrence in the file
-    def self.from_absolute_file(code_file, fragment_name, fragment_index)
+    def self.from_absolute_file(code_file, fragment_name, fragment_index, configuration)
       code_file = Pathname.new(code_file)
-      code_root = File.expand_path(@configuration.code_root)
+      code_root = File.expand_path(configuration.code_root)
       relative_path = code_file.relative_path_from code_root
-      return FragmentFile.new(relative_path.to_s, fragment_name, @configuration, fragment_index.to_s)
+      return FragmentFile.new(relative_path.to_s, fragment_name, configuration, fragment_index.to_s)
     end
 
     # Obtains the absolute path to this fragment file
@@ -268,7 +268,8 @@ module Jekyll::Commands
       if @fragment_name == Fragment::DEFAULT_FRAGMENT
         File.join(fragments_dir, @code_file)
       else
-        without_extension = File.join(File.dirname(@code_file), File.basename(@code_file))
+        base_name = File.basename(@code_file, '.*')
+        without_extension = File.join(File.dirname(@code_file), base_name)
         filename = "#{without_extension}-#{fragment_hash}-#{@fragment_index}"
         File.join(fragments_dir, filename + file_extension)
       end
