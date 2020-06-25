@@ -23,16 +23,37 @@ require_relative '../../lib/commands/configuration'
 class EmbeddingInstructionTest < Test::Unit::TestCase
 
   def test_parse_from_xml
-    xml = '<?embed-code file="foo" fragment="bar"?>'
+    xml = build_instruction 'org/example/Hello.java', 'Hello class'
+    configuration = create_config
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    assert_not_nil(instruction)
+  end
+
+  def test_read_fragment_dir
+    xml = build_instruction 'org/example/Hello.java'
+    configuration = create_config
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(28, lines.size)
+    assert_equal("public class Hello {\n", lines[22])
+  end
+
+  def create_config(prepared_fragments = true)
+    fragments_dir = prepared_fragments ? './test/prepared-fragments' : './test/fragments'
     yaml_like_hash = {
       'embed_code' => {
-        'code_root': './',
-        'documentation_root': './'
+        'code_root' => './test/code',
+        'fragments_dir' => fragments_dir,
+        'documentation_root' => './'
       }
     }
-    configuration = Jekyll::Commands::Configuration.new(yaml_like_hash)
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
-    puts instruction.content
+    Jekyll::Commands::Configuration.new(yaml_like_hash)
+  end
+
+  def build_instruction(file_name, fragment = nil)
+    fragment_attr = fragment ? "fragment=\"#{fragment}\"" : ''
+    "<?embed-code file=\"#{file_name}\" #{fragment_attr}?>"
   end
 
 end
