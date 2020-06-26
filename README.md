@@ -75,31 +75,34 @@ Here is an example of how a re-occurring fragment is rendered.
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence {
 
-    // #docfragment "standard-object-methods"
+    // #docfragment "Standard Object methods"
     public int hashCode() {
         // ...
         return hash;
     }
-    // #enddocfragment "standard-object-methods"
+    // #enddocfragment "Standard Object methods"
     
     /* here goes irrelevant code */
 
-    // #docfragment "standard-object-methods"
+    // #docfragment "Standard Object methods"
     public boolean equals(Object anObject) {
         // ...
         return false;
     }
-    // #enddocfragment "standard-object-methods"
+    // #enddocfragment "Standard Object methods"
 
     /* here goes more irrelevant code */
 
-    // #docfragment "standard-object-methods"
+    // #docfragment "Standard Object methods"
     public String toString() {
         return this;
     }
-    // #enddocfragment "standard-object-methods"
+    // #enddocfragment "Standard Object methods"
 }
 ```
+
+Note the usage of spaces in the fragment names. Thanks to putting fragment names into quotes, normal
+natual language can be used instead of `CamelCase`, `snake_case`, or `kebab-case`.
 
 **Result:**
 
@@ -125,7 +128,7 @@ You can start (or end) multiple fragments on a single line. Also they can overla
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence {
 
-    // #docfragment "standard-object-methods", "all-methods"
+    // #docfragment "Standard Object methods", "All methods"
     public int hashCode() {
         // ...
         return hash;
@@ -139,13 +142,13 @@ public final class String
     public String toString() {
         return this;
     }
-    // #enddocfragment "standard-object-methods"
+    // #enddocfragment "Standard Object methods"
 
     public boolean startsWith(String prefix, int toffset) {
         // ...
         return true;
     }
-    // #enddocfragment "all-methods"
+    // #enddocfragment "All methods"
 }
 ``` 
 
