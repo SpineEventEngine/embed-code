@@ -170,11 +170,12 @@ You can change these settings in the very place they're defined: [../_config.yml
 For example:
 ```yaml
 embed_code:
-  code_root: ./_samples                   # The directory that will be recursively scanned for sample code files.
-  code_includes: "**/*.java,**/*.gradle"  # The rules defining which code files to consider.
-  documentation_root: ./docs              # The directory with the Markdown to be processed.
-  fragments_dir: .fragments               # The directory where intermediary results of the plug-in are written.
-  interlayer: "..."                       # A piece of text to be inserted between occurrences of the same fragment.
+  code_root: ./_samples                        # The directory that will be recursively scanned for sample code files.
+  code_includes: ["**/*.java", "**/*.gradle"]  # The rules defining which code files to consider.
+  doc_includes:  ["docs/*.md", "docs/*.html"]  # The rules defining into which documentation files the tool should embed.
+  documentation_root: ./docs                   # The directory with the Markdown to be processed.
+  fragments_dir: .fragments                    # The directory where intermediary results of the plug-in are written.
+  interlayer: "..."                            # A piece of text to be inserted between occurrences of the same fragment.
 ```
 
 
