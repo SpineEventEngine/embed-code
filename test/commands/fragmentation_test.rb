@@ -58,4 +58,28 @@ class FragmentationTest < Test::Unit::TestCase
       Jekyll::Commands::Fragmentation.new(nil, config)
     end
   end
+
+  def test_requires_config
+    assert_raise ArgumentError do
+      Jekyll::Commands::Fragmentation.new('foo/bar', nil)
+    end
+  end
+
+  def test_fail_not_open_fragment
+    configuration = config
+    path = "#{configuration.code_root}/org/example/Unopen.java"
+    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    assert_raise StandardError do
+      fragmentation.write_fragments
+    end
+  end
+
+  # def test_fail_not_closed_fragment
+  #   configuration = config
+  #   path = "#{configuration.code_root}/org/example/Unclosed.java"
+  #   fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+  #   assert_raise StandardError do
+  #     fragmentation.write_fragments
+  #   end
+  # end
 end
