@@ -69,17 +69,25 @@ class FragmentationTest < Test::Unit::TestCase
     configuration = config
     path = "#{configuration.code_root}/org/example/Unopen.java"
     fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
-    assert_raise StandardError do
+    assert_raise do
       fragmentation.write_fragments
     end
   end
 
-  # def test_fail_not_closed_fragment
-  #   configuration = config
-  #   path = "#{configuration.code_root}/org/example/Unclosed.java"
-  #   fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
-  #   assert_raise StandardError do
-  #     fragmentation.write_fragments
-  #   end
-  # end
+  def test_fragment_without_end
+    configuration = config
+    file_name = 'Unclosed.java'
+    path = "#{configuration.code_root}/org/example/#{file_name}"
+    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation.write_fragments
+
+    fragment_dir = "#{configuration.fragments_dir}/org/example"
+    fragment_files = Dir.children(fragment_dir)
+    assert_equal 2, fragment_files.size
+
+    fragment_files.delete file_name
+
+    fragment_content = File.read "#{fragment_dir}/#{fragment_files[0]}"
+    assert_match(/^[.\n\s]+}\n}$/, fragment_content)
+  end
 end
