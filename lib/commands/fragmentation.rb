@@ -50,9 +50,9 @@ module Jekyll::Commands
     #
     # @param [Object] code_file a full path of a file to fragment
     def initialize(code_file, configuration)
-      unless code_file
-        raise ArgumentError, 'Failed to create Fragmentation'
-      end
+      raise ArgumentError, '`code_file` must be set.' unless code_file
+      raise ArgumentError, '`configuration` must be set.' unless configuration
+
       @configuration = configuration
       @sources_root = File.expand_path(configuration.code_root)
       @code_file = File.expand_path(code_file)
@@ -106,7 +106,8 @@ module Jekyll::Commands
             if fragment_builders.key?(fragment_name)
               fragment_builders[fragment_name].add_end_position(cursor - 1)
             else
-              raise StandardError.new "Can't end a fragment that wasn't started: #{fragment_name}"
+              raise StandardError,
+                    "Cannot end a fragment that wasn't started: ``#{fragment_name}``."
             end
           }
         else
@@ -165,7 +166,7 @@ module Jekyll::Commands
 
     def initialize(name = '')
       unless name
-        raise ArgumentError.new "Can't create fragment without a name"
+        raise ArgumentError 'Cannot create fragment without a name.'
       end
       @occurrences = []
       @name = name
@@ -193,7 +194,7 @@ module Jekyll::Commands
     def add_end_position(end_position = 0)
       last = @occurrences.last
       if not last or last.end_position
-        raise ArgumentError, 'Unexpected #enddocfragment statement'
+        raise StandardError, 'Unexpected #enddocfragment statement'
       end
       last.end_position = end_position
       self
@@ -213,7 +214,7 @@ module Jekyll::Commands
 
     def initialize(name = '', occurrences = [])
       unless name and occurrences
-        raise ArgumentError, "Can't create a fragment"
+        raise ArgumentError, 'Cannot create a fragment.'
       end
       @occurrences = occurrences
       @name = name
