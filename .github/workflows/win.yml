@@ -22,4 +22,4 @@ jobs:
         run: |
           gem install bundler
           bundle install
-          ruby ./test/run_test.rb
+          ruby ./test/run.rb

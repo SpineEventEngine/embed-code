@@ -32,11 +32,12 @@ end
 private
 
 def create_configuration(prepared_fragments)
-  fragments_dir = prepared_fragments ? './test/prepared-fragments' : './test/fragments'
+  fragments_dir =
+      prepared_fragments ? './test/resources/prepared-fragments' : './test/resources/fragments'
   # noinspection RubyStringKeysInHashInspection
   yaml_like_hash = {
     'embed_code' => {
-      'code_root' => './test/code',
+      'code_root' => './test/resources/code',
       'fragments_dir' => fragments_dir,
       'documentation_root' => './'
     }
