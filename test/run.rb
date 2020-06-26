@@ -25,9 +25,10 @@ test_dir = File.join(base_dir, 'test')
 
 $LOAD_PATH.unshift(lib_dir)
 
-travis = !ENV['TRAVIS'].nil?
+travis_pr = !ENV['TRAVIS'].nil? && ENV['TRAVIS_PULL_REQUEST'] != 'false'
 
-if travis
+if travis_pr
+  puts 'Building a PR on Travis. Code coverage will run.'
   SimpleCov.start do
     add_filter '/test/'
   end
@@ -37,7 +38,7 @@ result = Test::Unit::AutoRunner.run(true, test_dir)
 
 exit result if result != 0
 
-if travis
+if travis_pr
   require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
