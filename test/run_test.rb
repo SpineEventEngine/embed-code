@@ -16,13 +16,22 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'test/unit'
+require 'simplecov'
+require 'codecov'
+
 base_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 lib_dir  = File.join(base_dir, 'lib')
 test_dir = File.join(base_dir, 'test')
 
 $LOAD_PATH.unshift(lib_dir)
 
-require 'test/unit'
+SimpleCov.start do
+  add_filter "/test/"
+end
+
+if ENV['CI']
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
 
 exit Test::Unit::AutoRunner.run(true, test_dir)
-
