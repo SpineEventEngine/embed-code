@@ -106,8 +106,7 @@ module Jekyll::Commands
             if fragment_builders.key?(fragment_name)
               fragment_builders[fragment_name].add_end_position(cursor - 1)
             else
-              raise StandardError,
-                    "Cannot end a fragment that wasn't started: ``#{fragment_name}``."
+              raise "Cannot end a fragment that wasn't started: `#{fragment_name}`."
             end
           }
         else
@@ -165,9 +164,8 @@ module Jekyll::Commands
   class FragmentBuilder
 
     def initialize(name = '')
-      unless name
-        raise ArgumentError 'Cannot create fragment without a name.'
-      end
+      raise ArgumentError 'Cannot create fragment without a name.' unless name
+
       @occurrences = []
       @name = name
     end
@@ -179,7 +177,8 @@ module Jekyll::Commands
     # @param [Integer] start_position a starting position of the fragment
     def add_start_position(start_position = 0)
       if @occurrences.last and not @occurrences.last.end_position
-        raise ArgumentError, "Overlapping fragment detected: `#{name}`."
+        raise "Unexpected fragment start at #{start_position}. " \
+              "Fragment `#{name}` already started on line #{@occurrences.last.start_position}."
       end
       occurrence = OpenStruct.new('start_position' => start_position, 'end_position' => nil)
       @occurrences.push(occurrence)
@@ -212,6 +211,9 @@ module Jekyll::Commands
   class Fragment
     DEFAULT_FRAGMENT = '_default'
 
+    attr_reader :name
+    attr_reader :occurrences
+
     def initialize(name = '', occurrences = [])
       unless name and occurrences
         raise ArgumentError, 'Cannot create a fragment.'
@@ -227,9 +229,6 @@ module Jekyll::Commands
     def is_default?
       @name == DEFAULT_FRAGMENT
     end
-
-    attr_reader :name
-    attr_reader :occurrences
   end
 
   # A file storing a single fragment from the file.
