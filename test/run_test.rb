@@ -25,13 +25,19 @@ test_dir = File.join(base_dir, 'test')
 
 $LOAD_PATH.unshift(lib_dir)
 
-SimpleCov.start do
-  add_filter "/test/"
+travis = !ENV['TRAVIS'].nil?
+
+if travis
+  SimpleCov.start do
+    add_filter '/test/'
+  end
 end
 
-if ARGV.include? '--with-coverage'
+result = Test::Unit::AutoRunner.run(true, test_dir)
+
+exit result if result != 0
+
+if travis
   require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
-
-exit Test::Unit::AutoRunner.run(true, test_dir)

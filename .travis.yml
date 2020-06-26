@@ -3,4 +3,4 @@ language: ruby
 rvm:
   - 2.7
 
-script: ruby ./test/run_test.rb --with-coverage
+script: ruby ./test/run_test.rb
