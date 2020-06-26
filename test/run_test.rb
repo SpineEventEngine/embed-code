@@ -18,7 +18,6 @@
 
 require 'test/unit'
 require 'simplecov'
-require 'codecov'
 
 base_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 lib_dir  = File.join(base_dir, 'lib')
@@ -30,7 +29,8 @@ SimpleCov.start do
   add_filter "/test/"
 end
 
-if ENV['CI']
+if ARGV.include? '--with-coverage'
+  require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
