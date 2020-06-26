@@ -4,6 +4,3 @@ rvm:
   - 2.7
 
 script: ruby ./test/run.rb
-
-after_success:
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash <(curl -s https://codecov.io/bash); fi'
