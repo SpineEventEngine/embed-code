@@ -32,13 +32,8 @@ if travis_pr
   SimpleCov.start do
     add_filter '/test/'
   end
-end
-
-result = Test::Unit::AutoRunner.run(true, test_dir)
-
-exit result if result != 0
-
-if travis_pr
   require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
+
+exit Test::Unit::AutoRunner.run(true, test_dir)
