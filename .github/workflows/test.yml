@@ -27,6 +27,4 @@ jobs:
           gem install bundler
           bundle install
           ruby ./test/run_test.rb
-
-      - name: Upload coverage
-        run: curl -s https://codecov.io/bash | bash
+          curl -s https://codecov.io/bash | bash
