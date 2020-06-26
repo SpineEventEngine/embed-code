@@ -24,6 +24,13 @@ require_relative './given/test_env'
 
 class FragmentationTest < Test::Unit::TestCase
 
+  def teardown
+    dir_name = config.fragments_dir
+    if File.exist?(dir_name)
+      FileUtils.rm_r config.fragments_dir, secure: true
+    end
+  end
+
   def test_fragmentize_file
     configuration = config
     file_name = 'Hello.java'
@@ -46,7 +53,9 @@ class FragmentationTest < Test::Unit::TestCase
     end
   end
 
-  def teardown
-    FileUtils.rm_r config.fragments_dir, secure: true
+  def test_requires_code_file
+    assert_raise ArgumentError do
+      Jekyll::Commands::Fragmentation.new(nil, config)
+    end
   end
 end
