@@ -16,7 +16,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'ostruct'
 require 'fileutils'
 require 'digest/sha1'
 require_relative 'configuration'
@@ -73,20 +72,16 @@ module Jekyll::Commands
           file.write(content)
         else
           first_partition = fragment.partitions[0]
-          file.write(partition_content(content, first_partition))
+          file.write(first_partition.select(content))
           fragment.partitions[1..nil].each do |part|
             file.append("#{@configuration.interlayer}\n")
-            file.append(partition_content(content, part))
+            file.append(part.select(content))
           end
         end
       end
     end
 
     private
-
-    def partition_content(lines, part)
-      lines[part.start_position..part.end_position]
-    end
 
     # Splits the file into fragments.
     #
@@ -188,7 +183,7 @@ module Jekyll::Commands
         raise "Unexpected fragment start at #{start_position}. " \
               "Fragment `#{name}` already started on line #{@partitions.last.start_position}."
       end
-      partition = OpenStruct.new('start_position' => start_position, 'end_position' => nil)
+      partition = Partition.new(start_position, nil)
       @partitions.push(partition)
       self
     end
@@ -237,6 +232,25 @@ module Jekyll::Commands
 
     def is_default?
       @name == DEFAULT_FRAGMENT
+    end
+  end
+
+  # A code fragment partition.
+  #
+  # A fragment may consist of a few partitions, collected from different points in the code file. In
+  # the resulting doc file, the partitions are joined by the +Configuration::interlayer+.
+  #
+  class Partition
+    attr_accessor :start_position
+    attr_accessor :end_position
+
+    def initialize(start_position = 0, end_position = 0)
+      @start_position = start_position
+      @end_position = end_position
+    end
+
+    def select(lines)
+      lines[start_position..end_position]
     end
   end
 
