@@ -62,22 +62,13 @@ module Jekyll::Commands
     # Keeps the original directory structure relative to the @sources_root. That is,
     # `%SRC%/src/main` becomes `%OUT%/src/main`.
     def write_fragments
-      content, fragments = fragmentize
+      all_lines, fragments = fragmentize
 
       ensure_exists(target_directory)
 
       fragments.values.each do |fragment|
         file = FragmentFile.from_absolute_file(@code_file, fragment.name, @configuration)
-        if fragment.is_default?
-          file.write(content)
-        else
-          first_partition = fragment.partitions[0]
-          file.write(first_partition.select(content))
-          fragment.partitions[1..nil].each do |part|
-            file.append("#{@configuration.interlayer}\n")
-            file.append(part.select(content))
-          end
-        end
+        fragment.write_to(file, all_lines, @configuration)
       end
     end
 
@@ -90,34 +81,38 @@ module Jekyll::Commands
       fragment_builders = {}
       content_to_render = []
       File.open(@code_file).each do |line|
-        cursor = content_to_render.length
-
-        fragment_starts = get_fragment_starts(line)
-        fragment_ends = get_fragment_ends(line)
-
-        if fragment_starts.any?
-          fragment_starts.each do |fragment_name|
-            builder = FragmentBuilder.new(@code_file, fragment_name)
-            fragment = fragment_builders.fetch(fragment_name, builder)
-            fragment.add_start_position(cursor)
-            fragment_builders[fragment_name] = fragment
-          end
-        elsif fragment_ends.any?
-          fragment_ends.each do |fragment_name|
-            if fragment_builders.key?(fragment_name)
-              fragment_builders[fragment_name].add_end_position(cursor - 1)
-            else
-              raise "Cannot end the fragment `#{fragment_name}` as it wasn't started. " \
-                    "File: #{@code_file}"
-            end
-          end
-        else
-          content_to_render.push(line)
-        end
+        parse_line(line, content_to_render, fragment_builders)
       end
       fragments = fragment_builders.map { |k, v| [k, v.build] }.to_h
       fragments[Fragment::DEFAULT_FRAGMENT] = Fragment.create_default
       [content_to_render, fragments]
+    end
+
+    def parse_line(line, content_to_render, fragment_builders)
+      cursor = content_to_render.length
+
+      fragment_starts = get_fragment_starts(line)
+      fragment_ends = get_fragment_ends(line)
+
+      if fragment_starts.any?
+        fragment_starts.each do |fragment_name|
+          builder = FragmentBuilder.new(@code_file, fragment_name)
+          fragment = fragment_builders.fetch(fragment_name, builder)
+          fragment.add_start_position(cursor)
+          fragment_builders[fragment_name] = fragment
+        end
+      elsif fragment_ends.any?
+        fragment_ends.each do |fragment_name|
+          if fragment_builders.key?(fragment_name)
+            fragment_builders[fragment_name].add_end_position(cursor - 1)
+          else
+            raise "Cannot end the fragment `#{fragment_name}` as it wasn't started. " \
+                    "File: #{@code_file}"
+          end
+        end
+      else
+        content_to_render.push(line)
+      end
     end
 
     def target_directory
@@ -232,6 +227,19 @@ module Jekyll::Commands
 
     def is_default?
       @name == DEFAULT_FRAGMENT
+    end
+
+    def write_to(file, all_lines, configuration)
+      if is_default?
+        file.write(all_lines)
+      else
+        first_partition = @partitions[0]
+        file.write(first_partition.select(all_lines))
+        @partitions[1..nil].each do |part|
+          file.append("#{configuration.interlayer}\n")
+          file.append(part.select(all_lines))
+        end
+      end
     end
   end
 
