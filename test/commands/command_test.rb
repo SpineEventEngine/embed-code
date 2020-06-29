@@ -29,8 +29,8 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
   end
 
   def teardown
-    # delete_dir @config.fragments_dir
-    # delete_dir @config.documentation_root
+    delete_dir @config.fragments_dir
+    delete_dir @config.documentation_root
   end
 
   def test_process_files
