@@ -16,6 +16,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require('jekyll')
 require_relative('fragmentation')
 require_relative('embedding')
 require_relative('configuration')
@@ -27,23 +28,21 @@ require_relative('configuration')
 module Jekyll::Commands
 
   # Command which updates code embeddings in the documentation files.
-  class EmbedCodeSamples < Command
+  class EmbedCodeSamples < Jekyll::Command
 
     def self.init_with_program(prog)
       prog.command(:embedCodeSamples) do |c|
         c.syntax 'embedCode'
         c.description 'Embeds sample code to Markdown files'
-        c.action { |_, __| process }
+        c.action { |_, __| process(Configuration.from_file) }
       end
     end
 
-    def self.process
-      configuration = Configuration.from_file
-      write_code_fragments(configuration)
-      embed_code_fragments(configuration)
+    def self.process(configuration)
+      cmd = EmbedCodeSamples.new
+      cmd.write_code_fragments configuration
+      cmd.embed_code_fragments configuration
     end
-
-    private
 
     def write_code_fragments(configuration)
       includes = configuration.code_includes
@@ -51,7 +50,10 @@ module Jekyll::Commands
       includes.each do |rule|
         pattern = "#{code_root}/#{rule}"
         Dir.glob(pattern) do |code_file|
-          Fragmentation.new(code_file, configuration).write_fragments
+          if File.file? code_file
+            puts code_file
+            Fragmentation.new(code_file, configuration).write_fragments
+          end
         end
       end
     end
@@ -61,7 +63,7 @@ module Jekyll::Commands
       doc_patterns = configuration.doc_includes
       doc_patterns.each do |pattern|
         Dir.glob("#{documentation_root}/#{pattern}") do |documentation_file|
-          EmbeddingProcessor.new(documentation_file).embed
+          EmbeddingProcessor.new(documentation_file, configuration).embed
         end
       end
     end

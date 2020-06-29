@@ -77,7 +77,7 @@ module Jekyll::Commands
       @interlayer = (yaml['interlayer'] or DEFAULT_INTERLAYER)
     end
 
-    def from_file
+    def self.from_file
       FileConfiguration.instance.config
     end
   end

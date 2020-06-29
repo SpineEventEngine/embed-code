@@ -25,10 +25,7 @@ require_relative './given/test_env'
 class FragmentationTest < Test::Unit::TestCase
 
   def teardown
-    dir_name = config.fragments_dir
-    if File.exist?(dir_name)
-      FileUtils.rm_r config.fragments_dir, secure: true
-    end
+    delete_dir config.fragments_dir
   end
 
   def test_fragmentize_file

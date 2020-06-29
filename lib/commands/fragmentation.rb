@@ -297,6 +297,10 @@ module Jekyll::Commands
       end
     end
 
+    def exists?
+      File.exist? absolute_path
+    end
+
     private
 
     def fragment_hash

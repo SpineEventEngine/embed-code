@@ -16,38 +16,33 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-def config_with_prepared_fragments
-  config(prepared_fragments = true)
-end
+require 'test/unit'
+require_relative '../../lib/commands/command'
+require_relative '../../lib/commands/configuration'
+require_relative './given/test_env'
 
-def config(prepared_fragments = false, code_includes = nil)
-  fragments_dir =
-      prepared_fragments ? './test/resources/prepared-fragments' : './test/.fragments'
-  # noinspection RubyStringKeysInHashInspection
-  yaml_like_hash = {
-      'embed_code' => {
-          'code_root' => './test/resources/code',
-          'fragments_dir' => fragments_dir,
-          'documentation_root' => './test/.docs'
-      }
-  }
-  unless code_includes.nil?
-    yaml_like_hash['embed_code']['code_includes'] = code_includes
+class EmbedCodeSamplesTest < Test::Unit::TestCase
+
+  def setup
+    @config = config(false, ['**/Hello.java'])
+    prepare_docs './test/resources/docs'
   end
-  Jekyll::Commands::Configuration.new(yaml_like_hash)
-end
 
-def prepare_docs(source)
-  FileUtils.copy_entry source, config.documentation_root
-end
+  def teardown
+    # delete_dir @config.fragments_dir
+    # delete_dir @config.documentation_root
+  end
 
-def build_instruction(file_name, fragment = nil)
-  fragment_attr = fragment ? "fragment=\"#{fragment}\"" : ''
-  "<?embed-code file=\"#{file_name}\" #{fragment_attr}?>"
-end
+  def test_process_files
+    main_method_regex = /.*public static void main.*/
 
-def delete_dir(path)
-  if File.exist?(path)
-    FileUtils.rm_r path, secure: true
+    doc_file = "#{@config.documentation_root}/doc.md"
+    initial_content = File.read doc_file
+    assert_no_match(main_method_regex, initial_content)
+
+    Jekyll::Commands::EmbedCodeSamples.process(@config)
+
+    updated_content = File.read doc_file
+    assert_match(main_method_regex, updated_content)
   end
 end

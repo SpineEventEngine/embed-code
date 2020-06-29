@@ -79,8 +79,8 @@ module Jekyll::Commands
         result = []
         (0..100).each do |fragment_index|
           file = FragmentFile.new(@code_file, @fragment, @configuration, fragment_index)
-          fragment_content = file.content
-          if fragment_content
+          if file.exists?
+            fragment_content = file.content
             result.push(fragment_content)
           else
             break
