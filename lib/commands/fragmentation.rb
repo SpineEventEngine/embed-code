@@ -68,20 +68,25 @@ module Jekyll::Commands
       ensure_exists(target_directory)
 
       fragments.values.each do |fragment|
+        file = FragmentFile.from_absolute_file(@code_file, fragment.name, @configuration)
         if fragment.is_default?
-          file = FragmentFile.from_absolute_file(@code_file, fragment.name, nil, @configuration)
           file.write(content)
         else
-          fragment.occurrences.each_with_index do |occurrence, index|
-            file = FragmentFile.from_absolute_file(@code_file, fragment.name, index, @configuration)
-            fragment_content = content[occurrence.start_position..occurrence.end_position]
-            file.write(fragment_content)
+          first_occurrence = fragment.occurrences[0]
+          file.write(occurrence_content(content, first_occurrence))
+          fragment.occurrences[1..nil].each do |occ|
+            file.append("#{@configuration.interlayer}\n")
+            file.append(occurrence_content(content, occ))
           end
         end
       end
     end
 
     private
+
+    def occurrence_content(lines, occurrence)
+      lines[occurrence.start_position..occurrence.end_position]
+    end
 
     # Splits the file into fragments.
     #
@@ -96,19 +101,19 @@ module Jekyll::Commands
         fragment_ends = get_fragment_ends(line)
 
         if fragment_starts.any?
-          fragment_starts.each { |fragment_name|
+          fragment_starts.each do |fragment_name|
             fragment = fragment_builders.fetch(fragment_name, FragmentBuilder.new(fragment_name))
             fragment.add_start_position(cursor)
             fragment_builders[fragment_name] = fragment
-          }
+          end
         elsif fragment_ends.any?
-          fragment_ends.each { |fragment_name|
+          fragment_ends.each do |fragment_name|
             if fragment_builders.key?(fragment_name)
               fragment_builders[fragment_name].add_end_position(cursor - 1)
             else
               raise "Cannot end a fragment that wasn't started: `#{fragment_name}`."
             end
-          }
+          end
         else
           content_to_render.push(line)
         end
@@ -240,11 +245,9 @@ module Jekyll::Commands
     # @param [string] code_file a relative path to a code file
     # @param [string] fragment_name a name of the fragment in the code file
     # @param [Configuration] configuration the embedding configuration
-    # @param [string] fragment_index an index of the fragment occurrence in the file
-    def initialize(code_file, fragment_name, configuration, fragment_index = nil)
+    def initialize(code_file, fragment_name, configuration)
       @code_file = code_file
       @fragment_name = fragment_name
-      @fragment_index = fragment_index
       @configuration = configuration
     end
 
@@ -252,12 +255,11 @@ module Jekyll::Commands
     #
     # @param [string] code_file an absolute path to a code file
     # @param [string] fragment the fragment
-    # @param [integer] fragment_index an index of the fragment occurrence in the file
-    def self.from_absolute_file(code_file, fragment_name, fragment_index, configuration)
+    def self.from_absolute_file(code_file, fragment_name, configuration)
       code_file = Pathname.new(code_file)
       code_root = File.expand_path(configuration.code_root)
       relative_path = code_file.relative_path_from code_root
-      return FragmentFile.new(relative_path.to_s, fragment_name, configuration, fragment_index.to_s)
+      return FragmentFile.new(relative_path.to_s, fragment_name, configuration)
     end
 
     # Obtains the absolute path to this fragment file
@@ -270,7 +272,7 @@ module Jekyll::Commands
       else
         base_name = File.basename(@code_file, '.*')
         without_extension = File.join(File.dirname(@code_file), base_name)
-        filename = "#{without_extension}-#{fragment_hash}-#{@fragment_index}"
+        filename = "#{without_extension}-#{fragment_hash}"
         File.join(fragments_dir, filename + file_extension)
       end
     end
@@ -289,12 +291,11 @@ module Jekyll::Commands
     #
     # Overwrites the file if it exists.
     def write(content)
-      File.open(absolute_path, 'w+') do |f|
-        indentation = find_minimal_indentation(content)
-        content.each { |line|
-          f.puts(line[indentation..-1])
-        }
-      end
+      write_lines content, 'w+'
+    end
+
+    def append(content)
+      write_lines content, 'a+'
     end
 
     def exists?
@@ -302,6 +303,15 @@ module Jekyll::Commands
     end
 
     private
+
+    def write_lines(content, open_mode)
+      File.open(absolute_path, open_mode) do |f|
+        indentation = find_minimal_indentation(content)
+        content.each do |line|
+          f.puts(line[indentation..-1])
+        end
+      end
+    end
 
     def fragment_hash
       # Allows to use any characters in a fragment name

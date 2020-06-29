@@ -61,36 +61,9 @@ module Jekyll::Commands
     # If the fragment appears more than once in a file, the occurrences are interlayed with Configuration::interlayer.
     #
     def content
-      interlayer = @configuration.interlayer
-      lines = []
-      read_fragments.each do |content|
-        if lines.any?
-          lines.push(interlayer + "\n")
-        end
-        lines += content
-      end
-      lines
-    end
-
-    private
-
-    def read_fragments
-      if @fragment
-        result = []
-        (0..100).each do |fragment_index|
-          file = FragmentFile.new(@code_file, @fragment, @configuration, fragment_index)
-          if file.exists?
-            fragment_content = file.content
-            result.push(fragment_content)
-          else
-            break
-          end
-        end
-        result
-      else
-        fragment_file = FragmentFile.new(@code_file, Fragment::DEFAULT_FRAGMENT, @configuration, nil)
-        [fragment_file.content]
-      end
+      fragment_name = @fragment || Fragment::DEFAULT_FRAGMENT
+      file = FragmentFile.new(@code_file, fragment_name, @configuration)
+      file.content
     end
   end
 end

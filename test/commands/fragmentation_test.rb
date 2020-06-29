@@ -46,7 +46,7 @@ class FragmentationTest < Test::Unit::TestCase
     assert fragment_files.include? file_name
 
     fragment_files.each do |file|
-      assert_match(/Hello-\w+-\d+\.java/, file) unless file == file_name
+      assert_match(/Hello-\w+\.java/, file) unless file == file_name
     end
   end
 
