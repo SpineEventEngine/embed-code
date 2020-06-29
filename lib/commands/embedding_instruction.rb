@@ -58,8 +58,6 @@ module Jekyll::Commands
 
     # Reads the specified fragment from the code.
     #
-    # If the fragment appears more than once in a file, the occurrences are interlayed with Configuration::interlayer.
-    #
     def content
       fragment_name = @fragment || Fragment::DEFAULT_FRAGMENT
       file = FragmentFile.new(@code_file, fragment_name, @configuration)

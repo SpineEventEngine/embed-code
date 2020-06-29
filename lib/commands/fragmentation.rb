@@ -72,11 +72,11 @@ module Jekyll::Commands
         if fragment.is_default?
           file.write(content)
         else
-          first_occurrence = fragment.occurrences[0]
-          file.write(occurrence_content(content, first_occurrence))
-          fragment.occurrences[1..nil].each do |occ|
+          first_partition = fragment.partitions[0]
+          file.write(partition_content(content, first_partition))
+          fragment.partitions[1..nil].each do |part|
             file.append("#{@configuration.interlayer}\n")
-            file.append(occurrence_content(content, occ))
+            file.append(partition_content(content, part))
           end
         end
       end
@@ -84,8 +84,8 @@ module Jekyll::Commands
 
     private
 
-    def occurrence_content(lines, occurrence)
-      lines[occurrence.start_position..occurrence.end_position]
+    def partition_content(lines, part)
+      lines[part.start_position..part.end_position]
     end
 
     # Splits the file into fragments.
@@ -102,7 +102,8 @@ module Jekyll::Commands
 
         if fragment_starts.any?
           fragment_starts.each do |fragment_name|
-            fragment = fragment_builders.fetch(fragment_name, FragmentBuilder.new(fragment_name))
+            builder = FragmentBuilder.new(@code_file, fragment_name)
+            fragment = fragment_builders.fetch(fragment_name, builder)
             fragment.add_start_position(cursor)
             fragment_builders[fragment_name] = fragment
           end
@@ -111,7 +112,8 @@ module Jekyll::Commands
             if fragment_builders.key?(fragment_name)
               fragment_builders[fragment_name].add_end_position(cursor - 1)
             else
-              raise "Cannot end a fragment that wasn't started: `#{fragment_name}`."
+              raise "Cannot end the fragment `#{fragment_name}` as it wasn't started. " \
+                    "File: #{@code_file}"
             end
           end
         else
@@ -168,37 +170,39 @@ module Jekyll::Commands
   #
   class FragmentBuilder
 
-    def initialize(name = '')
+    def initialize(file_name, name = '')
       raise ArgumentError 'Cannot create fragment without a name.' unless name
 
-      @occurrences = []
+      @file_name = file_name
+      @partitions = []
       @name = name
     end
 
-    # Adds a new occurrence with the given start position.
+    # Adds a new partition with the given start position.
     #
     # Don't forget to call `add_end_position` when the end of the fragment is reached.
     #
     # @param [Integer] start_position a starting position of the fragment
     def add_start_position(start_position = 0)
-      if @occurrences.last and not @occurrences.last.end_position
+      if @partitions.last and not @partitions.last.end_position
         raise "Unexpected fragment start at #{start_position}. " \
-              "Fragment `#{name}` already started on line #{@occurrences.last.start_position}."
+              "Fragment `#{name}` already started on line #{@partitions.last.start_position}."
       end
-      occurrence = OpenStruct.new('start_position' => start_position, 'end_position' => nil)
-      @occurrences.push(occurrence)
+      partition = OpenStruct.new('start_position' => start_position, 'end_position' => nil)
+      @partitions.push(partition)
       self
     end
 
-    # Completes previously created occurrence with its end position.
+    # Completes previously created fragment partition with its end position.
     #
     # Should be called after `add_start_position`.
     #
     # @param [Integer] end_position an end position position of the fragment
     def add_end_position(end_position = 0)
-      last = @occurrences.last
+      last = @partitions.last
       if not last or last.end_position
-        raise StandardError, 'Unexpected #enddocfragment statement'
+        raise StandardError,
+              "Unexpected #enddocfragment statement at #{@file_name}:#{end_position}."
       end
       last.end_position = end_position
       self
@@ -207,7 +211,7 @@ module Jekyll::Commands
     # Builds a fragment
     #
     def build
-      Fragment.new(@name, @occurrences)
+      Fragment.new(@name, @partitions)
     end
   end
 
@@ -217,13 +221,13 @@ module Jekyll::Commands
     DEFAULT_FRAGMENT = '_default'
 
     attr_reader :name
-    attr_reader :occurrences
+    attr_reader :partitions
 
-    def initialize(name = '', occurrences = [])
-      unless name and occurrences
+    def initialize(name = '', partitions = [])
+      unless name and partitions
         raise ArgumentError, 'Cannot create a fragment.'
       end
-      @occurrences = occurrences
+      @partitions = partitions
       @name = name
     end
 

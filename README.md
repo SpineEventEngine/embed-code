@@ -64,8 +64,8 @@ You may use any name for your fragments, just omit double quotes (`"`) and symbo
 
 #### More on Fragments
 
-A fragment may appear in the file multiple times. When rendered, the occurrences of the fragment are
-joined together and interlaid with a special interlaying text (see [Configuration](#configuration)).
+A fragment may be partitioned within the file.When rendered, the partitions of a fragment are joined
+together and interlaid with a special interlaying text (see [Configuration](#configuration)).
 
 Here is an example of how a re-occurring fragment is rendered.
 
@@ -178,7 +178,7 @@ embed_code:
   doc_includes:  ["docs/*.md", "docs/*.html"]  # The rules defining into which documentation files the tool should embed.
   documentation_root: ./docs                   # The directory with the Markdown to be processed.
   fragments_dir: .fragments                    # The directory where intermediary results of the plug-in are written.
-  interlayer: "..."                            # A piece of text to be inserted between occurrences of the same fragment.
+  interlayer: "..."                            # A piece of text to be inserted between partitions of a single fragment.
 ```
 
 

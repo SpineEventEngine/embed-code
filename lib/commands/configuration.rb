@@ -58,7 +58,7 @@ module Jekyll::Commands
     # tracked VCS.
     attr_reader :fragments_dir
 
-    # A string that's inserted between multiple occurrences of the same fragment.
+    # A string that's inserted between multiple partitions of a single fragment.
     #
     # The default value is: "..." (three dots)
     attr_reader :interlayer
