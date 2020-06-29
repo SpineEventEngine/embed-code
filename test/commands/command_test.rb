@@ -34,7 +34,7 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
   end
 
   def test_process_files
-    main_method_regex = /.*public static void main.*/
+    main_method_regex = /^public static void main.*/
 
     doc_file = "#{@config.documentation_root}/doc.md"
     initial_content = File.read doc_file
