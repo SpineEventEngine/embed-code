@@ -51,7 +51,6 @@ module Jekyll::Commands
         pattern = "#{code_root}/#{rule}"
         Dir.glob(pattern) do |code_file|
           if File.file? code_file
-            puts code_file
             Fragmentation.new(code_file, configuration).write_fragments
           end
         end
