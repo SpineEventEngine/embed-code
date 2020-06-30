@@ -198,7 +198,7 @@ embed_code:
   code_includes: ["**/*.java", "**/*.gradle"]
   doc_includes:  ["docs/*.md", "docs/*.html"]
   fragments_dir: ".fragments"
-  interlayer: "..."
+  separator: "..."
 ```
 
 Other command configuration parameters include:
@@ -209,8 +209,8 @@ Other command configuration parameters include:
  - `fragments_dir` — a temporary directory for fragment files. The command extracts the code
    fragments files and stores them in a temporary dir. Consider adding this directory to
    `.gitignore`. By default, `./.fragments`
- - `interlayer` — a string which separates partitions of a single fragment in the resulting embedded
-   code. See [fragment doc](#more-on-fragments) for more. The interlayer is automatically appended
+ - `separator` — a string which separates partitions of a single fragment in the resulting embedded
+   code. See [fragment doc](#more-on-fragments) for more. The separator is automatically appended
    with a new line symbol. By default, `...`.
 
 ## Development

@@ -24,7 +24,7 @@ module Jekyll::Commands
   #
   class Configuration
 
-    DEFAULT_INTERLAYER = '...'.freeze
+    DEFAULT_SEPARATOR = '...'.freeze
     DEFAULT_FRAGMENTS_DIR = '.fragments'.freeze
     DEFAULT_INCLUDE = ['**/*'].freeze
     DEFAULT_DOC_INCLUDES = ['**/*.md', '**/*.html'].freeze
@@ -61,7 +61,7 @@ module Jekyll::Commands
     # A string that's inserted between multiple partitions of a single fragment.
     #
     # The default value is: "..." (three dots)
-    attr_reader :interlayer
+    attr_reader :separator
 
     def initialize(yaml_config)
       yaml = yaml_config['embed_code']
@@ -74,7 +74,7 @@ module Jekyll::Commands
       @code_includes = (yaml['code_includes'] or DEFAULT_INCLUDE)
       @doc_includes = (yaml['doc_includes'] or DEFAULT_DOC_INCLUDES)
       @fragments_dir = (yaml['fragments_dir'] or DEFAULT_FRAGMENTS_DIR)
-      @interlayer = (yaml['interlayer'] or DEFAULT_INTERLAYER)
+      @separator = (yaml['separator'] or DEFAULT_SEPARATOR)
     end
 
     def self.from_file
