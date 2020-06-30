@@ -48,7 +48,11 @@ module Jekyll::Commands
     # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
       document = Nokogiri::XML(line)
-      tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
+      instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
+      if instruction.nil?
+        return nil
+      end
+      tag = instruction.to_element
       fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
       EmbeddingInstruction.new(fields, configuration)
     rescue StandardError => e
