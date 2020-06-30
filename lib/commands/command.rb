@@ -16,6 +16,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require('jekyll')
 require_relative('fragmentation')
 require_relative('embedding')
 require_relative('configuration')
@@ -24,35 +25,45 @@ require_relative('configuration')
 #   bundle exec jekyll embedCodeSamples
 #
 
-module Jekyll
-  module Commands
-    class EmbedCodeSamples < Command
+module Jekyll::Commands
 
-      def self.init_with_program(prog)
-        prog.command(:embedCodeSamples) do |c|
-          c.syntax "embedCode"
-          c.description "Embeds sample code to Markdown files"
+  # Command which updates code embeddings in the documentation files.
+  class EmbedCodeSamples < Jekyll::Command
 
-          c.action { |args, options| process(args, options) }
+    def self.init_with_program(prog)
+      prog.command(:embedCodeSamples) do |c|
+        c.syntax 'embedCode'
+        c.description 'Embeds sample code to Markdown files'
+        c.action { |_, __| process(Configuration.from_file) }
+      end
+    end
+
+    def self.process(configuration)
+      cmd = EmbedCodeSamples.new
+      cmd.write_code_fragments configuration
+      cmd.embed_code_fragments configuration
+    end
+
+    def write_code_fragments(configuration)
+      includes = configuration.code_includes
+      code_root = configuration.code_root
+      includes.each do |rule|
+        pattern = "#{code_root}/#{rule}"
+        Dir.glob(pattern) do |code_file|
+          if File.file? code_file
+            Fragmentation.new(code_file, configuration).write_fragments
+          end
         end
       end
+    end
 
-      def self.process(args = [], options = {})
-        configuration = Configuration.instance
-
-        includes = configuration.code_includes
-        code_root = configuration.code_root
-        includes.each do |rule|
-          pattern = "#{code_root}/#{rule}"
-          Dir.glob(pattern) { |code_file|
-            Fragmentation.new(code_file).write_fragments
-          }
+    def embed_code_fragments(configuration)
+      documentation_root = configuration.documentation_root
+      doc_patterns = configuration.doc_includes
+      doc_patterns.each do |pattern|
+        Dir.glob("#{documentation_root}/#{pattern}") do |documentation_file|
+          EmbeddingProcessor.new(documentation_file, configuration).embed
         end
-
-        documentation_root = configuration.documentation_root
-        Dir.glob("#{documentation_root}/**/*.md") { |documentation_file|
-          EmbeddingProcessor.new(documentation_file).embed
-        }
       end
     end
   end

@@ -28,8 +28,9 @@ module Jekyll
     class EmbeddingProcessor
 
       # @param [String] markdown_file the path to the markdown file
-      def initialize(markdown_file = "")
+      def initialize(markdown_file, configuration)
         @markdown_file = markdown_file
+        @configuration = configuration
       end
 
       # Embeds sample code fragments in the documentation file.
@@ -49,18 +50,18 @@ module Jekyll
             transition = STATE_TO_TRANSITION[next_state]
             if transition.recognize(context)
               current_state = next_state
-              transition.accept(context)
+              transition.accept(context, @configuration)
               accepted = true
               break
             end
           end
           unless accepted
-            raise StandardError.new "Failed to parse the file"
+            raise StandardError, "Failed to parse the doc file `#{@markdown_file}`."
           end
         end
 
         if context.file_contains_embedding
-          IO.write(@markdown_file, context.result.join(""))
+          IO.write(@markdown_file, context.result.join(''))
         end
       end
     end
@@ -116,11 +117,11 @@ module Jekyll
         end
       end
 
-      def accept(context)
+      def accept(context, configuration)
         instruction_body = []
         until context.reached_eof
           instruction_body.push(context.current_line)
-          instruction = EmbeddingInstruction.from_xml(instruction_body.join(""))
+          instruction = EmbeddingInstruction.from_xml(instruction_body.join(''), configuration)
           if instruction
             context.embedding = instruction
           end
@@ -131,18 +132,18 @@ module Jekyll
           end
         end
         unless context.embedding
-          raise StandardError.new "Failed to parse an embedding instruction"
+          raise StandardError, 'Failed to parse an embedding instruction'
         end
       end
     end
 
     # A regular line in a Markdown, with no meaning for this plug-in.
     class RegularLine
-      def recognize(context)
+      def recognize(_)
         true
       end
 
-      def accept(context)
+      def accept(context, _)
         context.result.push(context.current_line)
         context.to_next_line
       end
@@ -158,7 +159,7 @@ module Jekyll
         end
       end
 
-      def accept(context)
+      def accept(context, _)
         line = context.current_line
         context.result.push(line)
         context.code_fence_started = true
@@ -179,7 +180,7 @@ module Jekyll
         end
       end
 
-      def accept(context)
+      def accept(context, _)
         line = context.current_line
         render_sample(context)
         context.result.push(line)
@@ -206,7 +207,7 @@ module Jekyll
         !context.reached_eof and context.code_fence_started
       end
 
-      def accept(context)
+      def accept(context, _)
         context.to_next_line
       end
     end
@@ -217,29 +218,29 @@ module Jekyll
         context.reached_eof
       end
 
-      def accept(context)
+      def accept(_, _)
         # No op.
       end
     end
 
     STATE_TO_TRANSITION = {
-        :REGULAR_LINE => RegularLine.new,
-        :EMBEDDING_INSTRUCTION => EmbedInstructionToken.new,
-        :CODE_FENCE_START => CodeFenceStart.new,
-        :CODE_FENCE_END => CodeFenceEnd.new,
-        :CODE_SAMPLE_LINE => CodeSampleLine.new,
-        :FINISH => Finish.new
-    }
+        REGULAR_LINE: RegularLine.new,
+        EMBEDDING_INSTRUCTION: EmbedInstructionToken.new,
+        CODE_FENCE_START: CodeFenceStart.new,
+        CODE_FENCE_END: CodeFenceEnd.new,
+        CODE_SAMPLE_LINE: CodeSampleLine.new,
+        FINISH: Finish.new
+    }.freeze
 
     # A simple grammar of the Markdown file that consists of the regular lines and the embedding instructions followed
     # by the code fences (empty or non-empty).
     TRANSITIONS = {
-        :START => [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
-        :REGULAR_LINE => [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
-        :EMBEDDING_INSTRUCTION => [:CODE_FENCE_START],
-        :CODE_FENCE_START => [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
-        :CODE_SAMPLE_LINE => [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
-        :CODE_FENCE_END => [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE]
-    }
+        START: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
+        REGULAR_LINE: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
+        EMBEDDING_INSTRUCTION: [:CODE_FENCE_START],
+        CODE_FENCE_START: [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
+        CODE_SAMPLE_LINE: [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
+        CODE_FENCE_END: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE]
+    }.freeze
   end
 end

@@ -1,0 +1,6 @@
+language: ruby
+
+rvm:
+  - 2.7
+
+script: ruby ./test/run.rb

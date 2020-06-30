@@ -16,10 +16,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-source 'https://rubygems.org'
+require 'test/unit'
+require 'simplecov'
 
-gem 'jekyll', '~> 3.8'
-gem 'nokogiri', '~> 1.10'
+base_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+lib_dir  = File.join(base_dir, 'lib')
+test_dir = File.join(base_dir, 'test')
 
-gem 'codecov', require: false, group: :test
-gem 'simplecov', require: false, group: :test
+$LOAD_PATH.unshift(lib_dir)
+
+travis_pr = !ENV['TRAVIS'].nil? && ENV['TRAVIS_PULL_REQUEST'] != 'false'
+
+if travis_pr
+  puts 'Building a PR on Travis. Code coverage will run.'
+  SimpleCov.start do
+    add_filter '/test/'
+  end
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
+exit Test::Unit::AutoRunner.run(true, test_dir)
