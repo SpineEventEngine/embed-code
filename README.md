@@ -79,8 +79,9 @@ You may use any name for your fragments, just omit double quotes (`"`) and symbo
 
 #### More on Fragments
 
-A fragment may be partitioned within the file.When rendered, the partitions of a fragment are joined
-together and interlaid with a special interlaying text (see [Configuration](#configuration)).
+A fragment may consist of one or several pieces declared in a single file. When rendered, the pieces
+which belong to a single fragment are joined together. One may also specify the text inserted in
+each joint point (see [Configuration](#configuration) for the corresponding parameter).
 
 Here is an example of how a re-occurring fragment is rendered.
 
@@ -116,8 +117,9 @@ public final class String
 }
 ```
 
-Note the usage of spaces in the fragment names. Thanks to putting fragment names into quotes, normal
-natual language can be used instead of `CamelCase`, `snake_case`, or `kebab-case`.
+As the name of each fragment is put into quotes, space symbols may be used. So one may use the
+natural language (e.g. "My favorite fragment here!") instead of `CamelCase`, `snake_case`, or
+`kebab-case` (e.g. "my-favourite-fragment-here-exclamation-mark").
 
 **Result:**
 
@@ -184,7 +186,7 @@ In order for the command to work, you need to specify at least two configuration
  - `code_root` — the directory where all the embedded code resides;
  - `documentation_root` — the directory where all the docs which need embedding reside.
 
-Those parameters should be specified via the Jekyll `_condig.yml` file.
+Those parameters should be specified via the Jekyll `_config.yml` file.
 
 For example:
 ```yaml
@@ -213,9 +215,10 @@ Other command configuration parameters include:
 
 ## Development
 
-This software is written in Ruby as it's a plug-in for Ruby-based [Jekyll](https://jekyllrb.com/).
-While Ruby may not be familiar to you, this plug-in consists of the trivial string and file
-manipulations which should be easy to understand.
+This software is written in Ruby as a plug-in for [Jekyll](https://jekyllrb.com/).
+
+The minimal required version of Ruby is `2.5` (constrained by Jekyll). However, it is recommended to
+use Ruby `2.7` or above, as it has security fixes for issues in `2.5`.
 
 ## Testing
 
