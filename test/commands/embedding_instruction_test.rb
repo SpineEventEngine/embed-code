@@ -77,4 +77,35 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_match(/\s{4}.+/, lines[1])
     assert_equal("}\n", lines.last)
   end
+
+  def test_start_without_end
+    xml = build_instruction 'org/example/Hello.java', nil, '*class*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(6, lines.size)
+    assert_equal("}\n", lines.last)
+  end
+
+  def test_end_without_start
+    xml = build_instruction 'org/example/Hello.java', nil, nil, 'package*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(21, lines.size)
+    assert_equal("/*\n", lines.first)
+    assert_equal("package org.example;\n", lines.last)
+  end
+
+  def test_one_line
+    xml = build_instruction 'org/example/Hello.java', nil, '*main*', '*main*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(1, lines.size)
+    assert_equal("public static void main(String[] args) {\n", lines.first)
+  end
 end
