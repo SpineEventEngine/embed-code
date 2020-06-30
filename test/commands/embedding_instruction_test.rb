@@ -39,4 +39,30 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_equal(28, lines.size)
     assert_equal("public class Hello {\n", lines[22])
   end
+
+  def test_fragment_and_start
+    xml = build_instruction 'org/example/Hello.java', 'fr1', 'public void hello()'
+    assert_raise ArgumentError do
+      Jekyll::Commands::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
+    end
+  end
+
+  def test_fragment_and_end
+    xml = build_instruction 'org/example/Hello.java', 'fr2', nil, '}'
+    assert_raise ArgumentError do
+      Jekyll::Commands::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
+    end
+  end
+
+  def test_extract_by_glob
+    xml = build_instruction 'org/example/Hello.java', nil, 'public class*', '*System.out*'
+    puts xml
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(4, lines.size)
+    assert_equal("public class Hello {\n", lines.first)
+    assert_equal("        System.out.println(\"Hello world\");\n", lines.last)
+  end
 end

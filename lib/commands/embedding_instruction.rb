@@ -42,7 +42,7 @@ module Jekyll::Commands
       @start = values['start']
       @end = values['end']
 
-      if !@fragment.nil? && !@start.nil? || !@end.nil?
+      if !@fragment.nil? && (!@start.nil? || !@end.nil?)
         raise ArgumentError,
               '<?embed-code?> should not specify both a fragment name and start/end patterns.'
       end
@@ -55,13 +55,15 @@ module Jekyll::Commands
     # @param [Object] line
     # @param [Configuration] configuration
     def self.from_xml(line, configuration)
-      document = Nokogiri::XML(line)
-      tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
+      begin
+        document = Nokogiri::XML(line)
+        tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
+      rescue StandardError => e
+        puts e
+        return nil
+      end
       fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
       EmbeddingInstruction.new(fields, configuration)
-    rescue StandardError => e
-      puts e
-      nil
     end
 
     # Reads the specified fragment from the code.
@@ -80,14 +82,15 @@ module Jekyll::Commands
 
     def matching_lines(lines)
       start_position = 0
+      line_count = lines.length
       if @start
-        until File.fnmatch? @start, lines[start_position]
+        until start_position >= line_count || File.fnmatch?(@start, lines[start_position])
           start_position += 1
         end
       end
       end_position = start_position
       if @end
-        until File.fnmatch @end, lines[end_position]
+        until end_position >= line_count || File.fnmatch(@end, lines[end_position])
           end_position += 1
         end
       else

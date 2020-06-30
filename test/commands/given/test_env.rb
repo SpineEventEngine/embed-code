@@ -17,7 +17,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 def config_with_prepared_fragments
-  config(prepared_fragments = true)
+  config(true)
 end
 
 def config(prepared_fragments = false, code_includes = nil)
@@ -41,13 +41,25 @@ def prepare_docs(source)
   FileUtils.copy_entry source, config.documentation_root
 end
 
-def build_instruction(file_name, fragment = nil)
-  fragment_attr = fragment ? "fragment=\"#{fragment}\"" : ''
-  "<?embed-code file=\"#{file_name}\" #{fragment_attr}?>"
+def build_instruction(file_name, fragment = nil, start_glob = nil, end_glob = nil)
+  fragment_attr = xml_attribute 'fragment', fragment
+  start_attr = xml_attribute 'start', start_glob
+  end_attr = xml_attribute 'end', end_glob
+  "<?embed-code file=\"#{file_name}\" #{fragment_attr} #{start_attr} #{end_attr}?>"
 end
 
 def delete_dir(path)
   if File.exist?(path)
     FileUtils.rm_r path, secure: true
+  end
+end
+
+private
+
+def xml_attribute(name, value)
+  if value.nil?
+    ''
+  else
+    "#{name}=\"#{value}\""
   end
 end
