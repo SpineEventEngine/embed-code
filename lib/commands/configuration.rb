@@ -17,7 +17,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'jekyll'
-require 'singleton'
 
 module Jekyll::Commands
   # The configuration of the plugin.
@@ -78,17 +77,7 @@ module Jekyll::Commands
     end
 
     def self.from_file
-      FileConfiguration.instance.config
-    end
-  end
-
-  class FileConfiguration
-    include Singleton
-
-    attr_reader :config
-
-    def initialize
-      yaml = Jekyll.configuration({})['embed_code']
+      yaml = Jekyll.configuration({})
       @configuration = Configuration.new yaml
     end
   end
