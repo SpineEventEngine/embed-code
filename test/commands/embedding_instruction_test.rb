@@ -56,7 +56,6 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
 
   def test_extract_by_glob
     xml = build_instruction 'org/example/Hello.java', nil, 'public class*', '*System.out*'
-    puts xml
     configuration = config_with_prepared_fragments
     instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
@@ -64,5 +63,18 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_equal(4, lines.size)
     assert_equal("public class Hello {\n", lines.first)
     assert_equal("        System.out.println(\"Hello world\");\n", lines.last)
+  end
+
+  def test_min_indentation
+    xml = build_instruction 'org/example/Hello.java', nil, '*public static void main*', '*}*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(3, lines.size)
+    assert_not_equal(' ', lines.first[0])
+    assert_match(/^public.+/, lines.first)
+    assert_match(/\s{4}.+/, lines[1])
+    assert_equal("}\n", lines.last)
   end
 end

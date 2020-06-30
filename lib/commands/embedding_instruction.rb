@@ -20,6 +20,7 @@ require 'nokogiri'
 require 'jekyll'
 
 require_relative 'fragmentation'
+require_relative 'indent'
 
 module Jekyll::Commands
 
@@ -96,7 +97,9 @@ module Jekyll::Commands
       else
         end_position = nil
       end
-      lines[start_position..end_position]
+      required_lines = lines[start_position..end_position]
+      indentation = find_minimal_indentation(required_lines)
+      required_lines.map { |line| line[indentation..-1] }
     end
   end
 end
