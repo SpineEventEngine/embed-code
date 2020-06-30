@@ -39,6 +39,14 @@ module Jekyll::Commands
     def initialize(values, configuration)
       @code_file = values['file']
       @fragment = values['fragment']
+      @start = values['start']
+      @end = values['end']
+
+      if !@fragment.nil? && !@start.nil? || !@end.nil?
+        raise ArgumentError,
+              '<?embed-code?> should not specify both a fragment name and start/end patterns.'
+      end
+
       @configuration = configuration
     end
 
@@ -61,7 +69,31 @@ module Jekyll::Commands
     def content
       fragment_name = @fragment || Fragment::DEFAULT_FRAGMENT
       file = FragmentFile.new(@code_file, fragment_name, @configuration)
-      file.content
+      if @start || @end
+        matching_lines(file.content)
+      else
+        file.content
+      end
+    end
+
+    private
+
+    def matching_lines(lines)
+      start_position = 0
+      if @start
+        until File.fnmatch? @start, lines[start_position]
+          start_position += 1
+        end
+      end
+      end_position = start_position
+      if @end
+        until File.fnmatch @end, lines[end_position]
+          end_position += 1
+        end
+      else
+        end_position = nil
+      end
+      lines[start_position..end_position]
     end
   end
 end
