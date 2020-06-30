@@ -1,33 +1,48 @@
 # embed-code
 
-This is a custom Jekyll [subcommand](https://jekyllrb.com/docs/plugins/commands/) that embeds code samples into 
-Markdown files:
+This is a Jekyll [subcommand](https://jekyllrb.com/docs/plugins/commands/) that embeds code samples
+into documentation files.
+
+## Installation
+
+To add the plugin to your Jekyll project, add the Gem to your `Gemfile`:
+```Gemfile
+gem 'embed-code', :git => 'https://github.com/SpineEventEngine/embed-code', :group => :jekyll_plugins
+```
+
+Now install the dependencies:
+```
+bundle install
+```
+
+_Note:_ Fetching a Gem from Git is a feature of Bundler. Right now, this cannot be replicated with
+the standard `gem` tool. Also, we don't publish `embed-code` into any Gem repository _yet_.
+
+## Usage
 
 ```
 bundle exec jekyll embedCodeSamples
 ```
-
-## Usage
 
 ### In Markdown
 
 To add a new code sample, add the following construct to the Markdown file:
 
 <pre>
-&lt;?embed-code file=&quot;java/lang/String.java&quot; 
+&lt;?embed-code file=&quot;java/lang/String.java&quot;
              fragment=&quot;constructors&quot; ?&gt;
 ```java
 ```   
 </pre>
 
-This is an `<?embed-code?>` tag followed by a code fence (with the language you need). The code fence may be empty, 
-or not empty, the command will overwrite it automatically. 
+This is an `<?embed-code?>` tag followed by a code fence (with the language you need). The code
+fence may be empty, or not empty, the command will overwrite it automatically. 
 
 #### Supported Attributes
 
- * **file.** A path to the code file relative to the code root, specified in the configuration.
- * **fragment.** A name of the fragment in the specified file. Omit documentation fragment if you want to embed 
- the whole file.
+ * `file` — a path to the code file relative to the code root, specified in the configuration.
+ * `fragment` — a name of the fragment in the specified file. Omit documentation fragment if you
+want to embed the whole file.
 
 ### In Code
 
@@ -122,7 +137,7 @@ public String toString() {
 }
 ```
 
-You can start (or end) multiple fragments on a single line. Also they can overlap:
+You can start (or end) multiple fragments on a single line. Also, they can overlap:
 
 ```java
 public final class String
@@ -165,27 +180,66 @@ The fragments can be used in other languages too:
 
 ### Configuration
 
-By default, the command recursively reads all files from `_samples` directory and embeds them into
-Markdown files found in `./docs` directory.
+In order for the command to work, you need to specify at least two configurations params:
+ - `code_root` — the directory where all the embedded code resides;
+ - `documentation_root` — the directory where all the docs which need embedding reside.
 
-You can change these settings in the very place they're defined: [../_config.yml]()
+Those parameters should be specified via the Jekyll `_condig.yml` file.
 
 For example:
 ```yaml
 embed_code:
-  code_root: ./_samples                        # The directory that will be recursively scanned for sample code files.
-  code_includes: ["**/*.java", "**/*.gradle"]  # The rules defining which code files to consider.
-  doc_includes:  ["docs/*.md", "docs/*.html"]  # The rules defining into which documentation files the tool should embed.
-  documentation_root: ./docs                   # The directory with the Markdown to be processed.
-  fragments_dir: .fragments                    # The directory where intermediary results of the plug-in are written.
-  interlayer: "..."                            # A piece of text to be inserted between partitions of a single fragment.
+  code_root: ./_samples
+  documentation_root: ./docs
+
+  # Optional params:
+  code_includes: ["**/*.java", "**/*.gradle"]
+  doc_includes:  ["docs/*.md", "docs/*.html"]
+  fragments_dir: ".fragments"
+  interlayer: "..."
 ```
 
+Other command configuration parameters include:
+ - `code_includes` — a list of glob patterns defining which code files to consider. By default,
+   all files (`**/*`).
+ - `doc_includes` — a list of glob patterns defining which doc files to consider. By default,
+   Markdown and HTML files (`**/*.md`, `**/*.html`).
+ - `fragments_dir` — a temporary directory for fragment files. The command extracts the code
+   fragments files and stores them in a temporary dir. Consider adding this directory to
+   `.gitignore`. By default, `./.fragments`
+ - `interlayer` — a string which separates partitions of a single fragment in the resulting embedded
+   code. See [fragment doc](#more-on-fragments) for more. The interlayer is automatically appended
+   with a new line symbol. By default, `...`.
 
-### Plug-in details
+## Development
 
-This software is written in Ruby as it's a plug-in for a Ruby-based Jekyll. While Ruby may not be familiar to you, 
-this plug-in consists of the trivial string and file manipulations which should be easy to understand. 
+This software is written in Ruby as it's a plug-in for Ruby-based [Jekyll](https://jekyllrb.com/).
+While Ruby may not be familiar to you, this plug-in consists of the trivial string and file
+manipulations which should be easy to understand.
+
+## Testing
+
+Before running tests, make sure to:
+
+1. Install Ruby. Check installation by running:
+    ```
+    ruby -v
+    ```
+2. Install Bundler:
+    ```
+    gem install bundler
+    ```
+3. Install project dependencies:
+    ```
+    bundle install
+    ```
+
+Now, run tests using the `test/run.rb` script:
+```
+ruby ./test/run.rb
+```
+
+When launched on Travis CI, the script also collects and uploads code coverage data.
 
 ### IDEA Live Template
 
