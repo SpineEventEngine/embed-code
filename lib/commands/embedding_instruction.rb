@@ -44,8 +44,8 @@ module Jekyll::Commands
 
     # Reads the instruction from the '<?embed-code?>' XML tag.
     #
-    # @param [Object] line with the XML
-    # @param [Configuration] configuration
+    # @param [Object] line line with the XML
+    # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
       document = Nokogiri::XML(line)
       tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
