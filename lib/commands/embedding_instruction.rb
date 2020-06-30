@@ -42,9 +42,9 @@ module Jekyll::Commands
       @configuration = configuration
     end
 
-    # Reads the instruction from the '<?embed-code?>' XML instruction.
+    # Reads the instruction from the '<?embed-code?>' XML tag.
     #
-    # @param [Object] line
+    # @param [Object] line with the XML
     # @param [Configuration] configuration
     def self.from_xml(line, configuration)
       document = Nokogiri::XML(line)
