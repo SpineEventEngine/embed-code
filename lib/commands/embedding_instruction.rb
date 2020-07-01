@@ -69,7 +69,6 @@ module Jekyll::Commands
       tag = instruction.to_element
       fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
       EmbeddingInstruction.new(fields, configuration)
-
     end
 
     # Reads the specified fragment from the code.
