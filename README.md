@@ -26,6 +26,8 @@ bundle exec jekyll embedCodeSamples
 
 ### In Markdown
 
+#### Named fragments
+
 To add a new code sample, add the following construct to the Markdown file:
 
 <pre>
@@ -35,20 +37,38 @@ To add a new code sample, add the following construct to the Markdown file:
 ```   
 </pre>
 
-This is an `<?embed-code?>` tag followed by a code fence (with the language you need). The code
-fence may be empty, or not empty, the command will overwrite it automatically. 
+This is an `<?embed-code?>` tag followed by a code fence (with the language you need). The content
+of the code fence does not matter — the command will overwrite it automatically.
 
-#### Supported Attributes
+The `file` attribute specifies the path to the code file relative to the code root, specified in
+the configuration. The `fragment` attribute specifies the name of the code fragment to embed. Omit
+this attribute to embed the whole file.
 
- * `file` — a path to the code file relative to the code root, specified in the configuration.
- * `fragment` — a name of the fragment in the specified file. Omit documentation fragment if you
-want to embed the whole file.
+#### Pattern fragments
+
+Alternatively, the `<?embed-code?>` tag may have the following form:
+<pre>
+&lt;?embed-code file=&quot;java/lang/String.java&quot;
+             start=&quot;*class Hello*&quot;
+             end=&quot;}*&quot;?&gt;
+```java
+```   
+</pre>
+
+The difference is that here fragment is specified by a pair of glob-style patterns. The patterns
+match the first and the last lines of the desired code fragment. Any of the patterns may be skipped.
+In such case, the fragment starts at the beginning or ends at the end of the code file.
+
+The pattern syntax supports basic glob constructs:
+ - `?` — one arbitrary symbol;
+ - `*` — zero, one, or many arbitrary symbols;
+ - `[set]` — one symbol from the given set (equivalent to `[set]` in regular expressions).
 
 ### In Code
 
 The whole file can be embedded without any additional effort.
 
-If you want to embed only a relevant portion of the file, mark it up into fragments like this:
+You can mark up the code file to select named fragments like this:
 
 ```java
 public final class String
@@ -71,7 +91,7 @@ public final class String
 }
 ```
 
-The fragments mark-up won't be rendered into Markdown.
+The `#docfragment` and `#enddocfragment` tags won't be copied into the resulting code fragment.
 
 #### Fragment Naming
 
