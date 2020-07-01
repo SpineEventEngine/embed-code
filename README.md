@@ -55,8 +55,8 @@ Alternatively, the `<?embed-code?>` tag may have the following form:
 ```   
 </pre>
 
-The difference is that here fragment is specified by a pair of glob-style patterns. The patterns
-match the first and the last lines of the desired code fragment. Any of the patterns may be skipped.
+In this case, the fragment is specified by a pair of glob-style patterns. The patterns match 
+the first and the last lines of the desired code fragment. Any of the patterns may be skipped.
 In such a case, the fragment starts at the beginning or ends at the end of the code file.
 
 The pattern syntax supports basic glob constructs:
