@@ -19,6 +19,7 @@
 require 'fileutils'
 require 'digest/sha1'
 require_relative 'configuration'
+require_relative 'indent'
 
 module Jekyll::Commands
 
@@ -332,7 +333,7 @@ module Jekyll::Commands
 
     def write_lines(content, open_mode)
       File.open(absolute_path, open_mode) do |f|
-        indentation = find_minimal_indentation(content)
+        indentation = max_common_indentation(content)
         content.each do |line|
           f.puts(line[indentation..-1])
         end
@@ -342,19 +343,6 @@ module Jekyll::Commands
     def fragment_hash
       # Allows to use any characters in a fragment name
       (Digest::SHA1.hexdigest @fragment_name)[0..7]
-    end
-
-    def find_minimal_indentation(lines)
-      min_indentation = Float::INFINITY
-      lines.each do |line|
-        unless line.strip.empty?
-          spaces = line[/\A */].size
-          if spaces < min_indentation
-            min_indentation = spaces
-          end
-        end
-      end
-      min_indentation
     end
   end
 end

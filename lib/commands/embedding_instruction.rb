@@ -20,6 +20,7 @@ require 'nokogiri'
 require 'jekyll'
 
 require_relative 'fragmentation'
+require_relative 'indent'
 
 module Jekyll::Commands
 
@@ -39,6 +40,14 @@ module Jekyll::Commands
     def initialize(values, configuration)
       @code_file = values['file']
       @fragment = values['fragment']
+      @start = values['start']
+      @end = values['end']
+
+      if !@fragment.nil? && (!@start.nil? || !@end.nil?)
+        raise ArgumentError,
+              '<?embed-code?> should not specify both a fragment name and start/end patterns.'
+      end
+
       @configuration = configuration
     end
 
@@ -47,17 +56,19 @@ module Jekyll::Commands
     # @param [Object] line line with the XML
     # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
-      document = Nokogiri::XML(line)
-      instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
+      begin
+        document = Nokogiri::XML(line)
+        instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
+      rescue StandardError => e
+        puts e
+        return nil
+      end
       if instruction.nil?
         return nil
       end
       tag = instruction.to_element
       fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
       EmbeddingInstruction.new(fields, configuration)
-    rescue StandardError => e
-      puts e
-      nil
     end
 
     # Reads the specified fragment from the code.
@@ -65,7 +76,34 @@ module Jekyll::Commands
     def content
       fragment_name = @fragment || Fragment::DEFAULT_FRAGMENT
       file = FragmentFile.new(@code_file, fragment_name, @configuration)
-      file.content
+      if @start || @end
+        matching_lines(file.content)
+      else
+        file.content
+      end
+    end
+
+    private
+
+    def matching_lines(lines)
+      start_position = 0
+      line_count = lines.length
+      if @start
+        until start_position >= line_count || File.fnmatch?(@start, lines[start_position])
+          start_position += 1
+        end
+      end
+      end_position = start_position
+      if @end
+        until end_position >= line_count || File.fnmatch(@end, lines[end_position])
+          end_position += 1
+        end
+      else
+        end_position = nil
+      end
+      required_lines = lines[start_position..end_position]
+      indentation = max_common_indentation(required_lines)
+      required_lines.map { |line| line[indentation..-1] }
     end
   end
 end

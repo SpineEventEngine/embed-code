@@ -39,4 +39,73 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_equal(28, lines.size)
     assert_equal("public class Hello {\n", lines[22])
   end
+
+  def test_fragment_and_start
+    xml = build_instruction 'org/example/Hello.java', 'fr1', 'public void hello()'
+    assert_raise ArgumentError do
+      Jekyll::Commands::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
+    end
+  end
+
+  def test_fragment_and_end
+    xml = build_instruction 'org/example/Hello.java', 'fr2', nil, '}'
+    assert_raise ArgumentError do
+      Jekyll::Commands::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
+    end
+  end
+
+  def test_extract_by_glob
+    xml = build_instruction 'org/example/Hello.java', nil, 'public class*', '*System.out*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(4, lines.size)
+    assert_equal("public class Hello {\n", lines.first)
+    assert_equal("        System.out.println(\"Hello world\");\n", lines.last)
+  end
+
+  def test_min_indentation
+    xml = build_instruction 'org/example/Hello.java', nil, '*public static void main*', '*}*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(3, lines.size)
+    assert_not_equal(' ', lines.first[0])
+    assert_match(/^public.+/, lines.first)
+    assert_match(/\s{4}.+/, lines[1])
+    assert_equal("}\n", lines.last)
+  end
+
+  def test_start_without_end
+    xml = build_instruction 'org/example/Hello.java', nil, '*class*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(6, lines.size)
+    assert_equal("}\n", lines.last)
+  end
+
+  def test_end_without_start
+    xml = build_instruction 'org/example/Hello.java', nil, nil, 'package*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(21, lines.size)
+    assert_equal("/*\n", lines.first)
+    assert_equal("package org.example;\n", lines.last)
+  end
+
+  def test_one_line
+    xml = build_instruction 'org/example/Hello.java', nil, '*main*', '*main*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_not_nil(lines)
+    assert_equal(1, lines.size)
+    assert_equal("public static void main(String[] args) {\n", lines.first)
+  end
 end
