@@ -16,7 +16,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-def find_minimal_indentation(lines)
+# Finds the maximal common indentation of the given lines.
+#
+# @param lines an array of lines which may or may not have leading whitespaces
+# @return the number of leading whitespaces in all the lines except for the empty ones
+def max_common_indentation(lines)
   min_indentation = Float::INFINITY
   lines.each do |line|
     unless line.strip.empty?

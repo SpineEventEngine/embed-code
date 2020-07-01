@@ -103,7 +103,7 @@ module Jekyll::Commands
         end_position = nil
       end
       required_lines = lines[start_position..end_position]
-      indentation = find_minimal_indentation(required_lines)
+      indentation = max_common_indentation(required_lines)
       required_lines.map { |line| line[indentation..-1] }
     end
   end

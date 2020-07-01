@@ -333,7 +333,7 @@ module Jekyll::Commands
 
     def write_lines(content, open_mode)
       File.open(absolute_path, open_mode) do |f|
-        indentation = find_minimal_indentation(content)
+        indentation = max_common_indentation(content)
         content.each do |line|
           f.puts(line[indentation..-1])
         end
