@@ -57,8 +57,8 @@ module Jekyll::Commands
     # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
       begin
-      document = Nokogiri::XML(line)
-      instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
+        document = Nokogiri::XML(line)
+        instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
       rescue StandardError => e
         puts e
         return nil
