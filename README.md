@@ -42,7 +42,7 @@ of the code fence does not matter — the command will overwrite it automaticall
 
 The `file` attribute specifies the path to the code file relative to the code root, specified in
 the configuration. The `fragment` attribute specifies the name of the code fragment to embed. Omit
-this attribute to embed the whole file.
+this attribute to embed the whole file or to use glob patterns.
 
 #### Pattern fragments
 
@@ -57,7 +57,7 @@ Alternatively, the `<?embed-code?>` tag may have the following form:
 
 The difference is that here fragment is specified by a pair of glob-style patterns. The patterns
 match the first and the last lines of the desired code fragment. Any of the patterns may be skipped.
-In such case, the fragment starts at the beginning or ends at the end of the code file.
+In such a case, the fragment starts at the beginning or ends at the end of the code file.
 
 The pattern syntax supports basic glob constructs:
  - `?` — one arbitrary symbol;
