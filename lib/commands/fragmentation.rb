@@ -58,6 +58,19 @@ module Jekyll::Commands
       @code_file = File.expand_path(code_file)
     end
 
+    def self.write_fragment_files(configuration)
+      includes = configuration.code_includes
+      code_root = configuration.code_root
+      includes.each do |rule|
+        pattern = "#{code_root}/#{rule}"
+        Dir.glob(pattern) do |code_file|
+          if File.file? code_file
+            Fragmentation.new(code_file, configuration).write_fragments
+          end
+        end
+      end
+    end
+
     # Serializes fragments to the output directory.
     #
     # Keeps the original directory structure relative to the @sources_root. That is,

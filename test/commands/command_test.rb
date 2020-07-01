@@ -17,7 +17,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'test/unit'
-require_relative '../../lib/commands/command'
+require_relative '../../lib/commands/embed_command'
 require_relative '../../lib/commands/configuration'
 require_relative './given/test_env'
 
