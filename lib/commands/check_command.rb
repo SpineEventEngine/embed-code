@@ -28,7 +28,9 @@ require_relative('fragmentation')
 
 module Jekyll::Commands
 
-  # Command which updates code embeddings in the documentation files.
+  # Command which checks if code embeddings in the documentation files are up-to-date with the code
+  # of the examples.
+  #
   class CheckCodeSamples < Jekyll::Command
 
     def self.init_with_program(prog)
