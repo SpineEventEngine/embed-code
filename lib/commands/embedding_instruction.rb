@@ -51,20 +51,25 @@ module Jekyll::Commands
       @configuration = configuration
     end
 
-    # Reads the instruction from the '<?embed-code?>' XML instruction.
+    # Reads the instruction from the '<?embed-code?>' XML tag.
     #
-    # @param [Object] line
-    # @param [Configuration] configuration
+    # @param [Object] line line with the XML
+    # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
       begin
-        document = Nokogiri::XML(line)
-        tag = document.at_xpath("//processing-instruction('#{TAG_NAME}')").to_element
+      document = Nokogiri::XML(line)
+      instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
       rescue StandardError => e
         puts e
         return nil
       end
+      if instruction.nil?
+        return nil
+      end
+      tag = instruction.to_element
       fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
       EmbeddingInstruction.new(fields, configuration)
+
     end
 
     # Reads the specified fragment from the code.

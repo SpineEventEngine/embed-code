@@ -237,7 +237,7 @@ module Jekyll::Commands
         first_partition = @partitions[0]
         file.write(first_partition.select(all_lines))
         @partitions[1..nil].each do |part|
-          file.append("#{configuration.interlayer}\n")
+          file.append("#{configuration.separator}\n")
           file.append(part.select(all_lines))
         end
       end
@@ -247,7 +247,7 @@ module Jekyll::Commands
   # A code fragment partition.
   #
   # A fragment may consist of a few partitions, collected from different points in the code file. In
-  # the resulting doc file, the partitions are joined by the +Configuration::interlayer+.
+  # the resulting doc file, the partitions are joined by the +Configuration::separator+.
   #
   class Partition
     attr_accessor :start_position
