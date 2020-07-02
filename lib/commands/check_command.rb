@@ -21,7 +21,6 @@ require_relative('configuration')
 require_relative('embedding')
 require_relative('fragmentation')
 
-
 # Usage example:
 #   bundle exec jekyll checkCodeSamples
 #
@@ -34,7 +33,7 @@ module Jekyll::Commands
   class CheckCodeSamples < Jekyll::Command
 
     def self.init_with_program(prog)
-      prog.command('checkCodeSamples') do |c|
+      prog.command(:checkCodeSamples) do |c|
         c.description 'Checks that the doc files are up to date with the sample code.'
         c.action { |_, __| process(Configuration.from_file) }
       end

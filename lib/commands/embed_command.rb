@@ -31,7 +31,7 @@ module Jekyll::Commands
   class EmbedCodeSamples < Jekyll::Command
 
     def self.init_with_program(prog)
-      prog.command('embedCodeSamples') do |c|
+      prog.command(:embedCodeSamples) do |c|
         c.description 'Embeds sample code into doc files.'
         c.action { |_, __| process(Configuration.from_file) }
       end
