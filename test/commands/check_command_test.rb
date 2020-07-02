@@ -48,7 +48,7 @@ class CheckCodeSamplesTest < Test::Unit::TestCase
   end
 
   def test_nothing_to_update
-    @config = config(false, ['**/Hello.java'], ['**/already-embedded.md'])
+    @config = config(false, ['**/Hello.java'], ['**/no-embedding-doc.md'])
     assert_nothing_raised do
       Jekyll::Commands::CheckCodeSamples.process @config
     end
