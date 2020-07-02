@@ -16,8 +16,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'ostruct'
-require 'fileutils'
+module Jekyll::Commands
 
-require_relative('commands/embed_command.rb')
-require_relative('commands/check_command.rb')
+  # An error produced when documentation files are not up-to-date with the code of examples.
+  #
+  class UnexpectedDiffError < StandardError
+
+    def initialize(files)
+      super("Embeddings are not up-to-date. Some files need to be updated: #{files}")
+    end
+  end
+end

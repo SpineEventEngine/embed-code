@@ -18,7 +18,7 @@ bundle install
 _Note:_ Fetching a Gem from Git is a feature of Bundler. Right now, this cannot be replicated with
 the standard `gem` tool. Also, we don't publish `embed-code` into any Gem repository _yet_.
 
-## Usage
+## Embedding code
 
 ```
 bundle exec jekyll embedCodeSamples
@@ -84,7 +84,7 @@ public final class String
         this.hash = original.hash;
     }
 
-    public String(char value[]) {
+    public String(char[] value) {
         this.value = Arrays.copyOf(value, value.length);
     }
     // #enddocfragment "constructors"
@@ -232,6 +232,25 @@ Other command configuration parameters include:
  - `separator` — a string which separates partitions of a single fragment in the resulting embedded
    code. See [fragment doc](#more-on-fragments) for more. The separator is automatically appended
    with a new line symbol. By default, `...`.
+   
+## Checking if embeddings are up-to-date
+
+Sometimes, instead of updating code embeddings in doc files, you just want to make sure that
+the doc is up-to-date with the code examples. It might be helpful to perform that check on CI when
+changing the documentation.
+
+For this purpose, `embed-code` provides another command:
+
+```
+bundle exec jekyll checkCodeSamples
+```
+
+The command does nothing if the code fragments are up-to-date with the original examples. If,
+however, the code fragments are outdated, the command reports an error.
+
+Under the hood, the command constructs the same code embeddings as does `embedCodeSamples`, but
+instead of changing the doc files, checks if the files on the file system are identical to the ones
+it constructed. If they are not, the process finishes with a non-0 exit code.
 
 ## Development
 

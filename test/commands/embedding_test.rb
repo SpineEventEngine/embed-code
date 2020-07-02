@@ -17,32 +17,41 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'test/unit'
-require_relative '../../lib/commands/command'
 require_relative '../../lib/commands/configuration'
+require_relative '../../lib/commands/embedding'
+require_relative '../../lib/commands/errors'
 require_relative './given/test_env'
 
-class EmbedCodeSamplesTest < Test::Unit::TestCase
+class EmbeddingProcessorTest < Test::Unit::TestCase
 
   def setup
-    @config = config(false, ['**/Hello.java'])
+    @config = config_with_prepared_fragments
     prepare_docs './test/resources/docs'
   end
 
   def teardown
-    delete_dir @config.fragments_dir
     delete_dir @config.documentation_root
   end
 
-  def test_process_files
-    main_method_regex = /^public static void main.*/
+  def test_not_up_to_date
+    processor = Jekyll::Commands::EmbeddingProcessor.new(
+      "#{@config.documentation_root}/whole-file-fragment.md", @config
+    )
+    assert !processor.up_to_date?
+  end
 
-    doc_file = "#{@config.documentation_root}/doc.md"
-    initial_content = File.read doc_file
-    assert_no_match(main_method_regex, initial_content)
+  def test_up_to_date
+    processor = Jekyll::Commands::EmbeddingProcessor.new(
+      "#{@config.documentation_root}/whole-file-fragment.md", @config
+    )
+    processor.embed
+    assert processor.up_to_date?
+  end
 
-    Jekyll::Commands::EmbedCodeSamples.process(@config)
-
-    updated_content = File.read doc_file
-    assert_match(main_method_regex, updated_content)
+  def test_nothing_to_update
+    processor = Jekyll::Commands::EmbeddingProcessor.new(
+      "#{@config.documentation_root}/no-embedding-doc.md", @config
+    )
+    assert processor.up_to_date?
   end
 end

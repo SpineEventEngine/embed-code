@@ -17,54 +17,31 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require('jekyll')
-require_relative('fragmentation')
-require_relative('embedding')
 require_relative('configuration')
+require_relative('embedding')
+require_relative('fragmentation')
 
 # Usage example:
-#   bundle exec jekyll embedCodeSamples
+#   bundle exec jekyll checkCodeSamples
 #
 
 module Jekyll::Commands
 
-  # Command which updates code embeddings in the documentation files.
-  class EmbedCodeSamples < Jekyll::Command
+  # Command which checks if code embeddings in the documentation files are up-to-date with the code
+  # of the examples.
+  #
+  class CheckCodeSamples < Jekyll::Command
 
     def self.init_with_program(prog)
-      prog.command(:embedCodeSamples) do |c|
-        c.syntax 'embedCode'
-        c.description 'Embeds sample code to Markdown files'
+      prog.command(:checkCodeSamples) do |c|
+        c.description 'Checks that the doc files are up-to-date with the sample code.'
         c.action { |_, __| process(Configuration.from_file) }
       end
     end
 
     def self.process(configuration)
-      cmd = EmbedCodeSamples.new
-      cmd.write_code_fragments configuration
-      cmd.embed_code_fragments configuration
-    end
-
-    def write_code_fragments(configuration)
-      includes = configuration.code_includes
-      code_root = configuration.code_root
-      includes.each do |rule|
-        pattern = "#{code_root}/#{rule}"
-        Dir.glob(pattern) do |code_file|
-          if File.file? code_file
-            Fragmentation.new(code_file, configuration).write_fragments
-          end
-        end
-      end
-    end
-
-    def embed_code_fragments(configuration)
-      documentation_root = configuration.documentation_root
-      doc_patterns = configuration.doc_includes
-      doc_patterns.each do |pattern|
-        Dir.glob("#{documentation_root}/#{pattern}") do |documentation_file|
-          EmbeddingProcessor.new(documentation_file, configuration).embed
-        end
-      end
+      Fragmentation.write_fragment_files configuration
+      EmbeddingProcessor.check_up_to_date configuration
     end
   end
 end

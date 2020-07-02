@@ -16,8 +16,33 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'ostruct'
-require 'fileutils'
+require 'test/unit'
+require_relative '../../lib/commands/embed_command'
+require_relative '../../lib/commands/configuration'
+require_relative './given/test_env'
 
-require_relative('commands/embed_command.rb')
-require_relative('commands/check_command.rb')
+class EmbedCodeSamplesTest < Test::Unit::TestCase
+
+  def setup
+    @config = config(false, ['**/Hello.java'])
+    prepare_docs './test/resources/docs'
+  end
+
+  def teardown
+    delete_dir @config.fragments_dir
+    delete_dir @config.documentation_root
+  end
+
+  def test_process_files
+    main_method_regex = /^public static void main.*/
+
+    doc_file = "#{@config.documentation_root}/doc.md"
+    initial_content = File.read doc_file
+    assert_no_match(main_method_regex, initial_content)
+
+    Jekyll::Commands::EmbedCodeSamples.process(@config)
+
+    updated_content = File.read doc_file
+    assert_match(main_method_regex, updated_content)
+  end
+end

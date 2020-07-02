@@ -16,9 +16,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'nokogiri'
+require('nokogiri')
 require_relative('configuration')
 require_relative('embedding_instruction')
+require_relative('errors')
 
 module Jekyll
   module Commands
@@ -27,21 +28,73 @@ module Jekyll
     #
     class EmbeddingProcessor
 
-      # @param [String] markdown_file the path to the markdown file
-      def initialize(markdown_file, configuration)
-        @markdown_file = markdown_file
+      # @param [String] doc_file the path to the markdown file
+      def initialize(doc_file, configuration)
+        @doc_file = doc_file
         @configuration = configuration
+      end
+
+      def self.embed_all(configuration)
+        documentation_root = configuration.documentation_root
+        doc_patterns = configuration.doc_includes
+        doc_patterns.each do |pattern|
+          Dir.glob("#{documentation_root}/#{pattern}") do |documentation_file|
+            EmbeddingProcessor.new(documentation_file, configuration).embed
+          end
+        end
+      end
+
+      def self.check_up_to_date(configuration)
+        changed_files = find_changed_files configuration
+        unless changed_files.empty?
+          raise UnexpectedDiffError, changed_files
+        end
+      end
+
+      private_class_method def self.find_changed_files(configuration)
+        documentation_root = configuration.documentation_root
+        doc_patterns = configuration.doc_includes
+        changed_files = []
+        doc_patterns.each do |pattern|
+          Dir.glob("#{documentation_root}/#{pattern}") do |documentation_file|
+            up_to_date = EmbeddingProcessor.new(documentation_file, configuration).up_to_date?
+            unless up_to_date
+              changed_files.append documentation_file
+            end
+          end
+        end
+        changed_files
       end
 
       # Embeds sample code fragments in the documentation file.
       #
-      # This method looks for appearances of `EmbeddingInstruction` followed by the code fence. The code fence
-      # may be not empty, in which case its content will be overwritten.
+      # This method looks for appearances of `EmbeddingInstruction` followed by the code fence.
+      # The code fence  may be not empty, in which case its content will be overwritten.
       #
       # If the file doesn't contain any embedding statements, it is not changed.
       #
       def embed
-        context = MarkdownParsingContext.new(@markdown_file)
+        context = construct_embedding
+
+        if context.file_contains_embedding && context.content_changed?
+          IO.write(@doc_file, context.result.join(''))
+        end
+      end
+
+      # Checks if the code fragments in the documentation file are up-to-date with the original
+      # code examples.
+      #
+      # See +embed+ for updating the code samples.
+      #
+      def up_to_date?
+        context = construct_embedding
+        !context.content_changed?
+      end
+
+      private
+
+      def construct_embedding
+        context = ParsingContext.new(@doc_file)
 
         current_state = :START
         while current_state != :FINISH
@@ -56,17 +109,23 @@ module Jekyll
             end
           end
           unless accepted
-            raise StandardError, "Failed to parse the doc file `#{@markdown_file}`."
+            raise StandardError, "Failed to parse the doc file `#{@doc_file}`."
           end
         end
-
-        if context.file_contains_embedding
-          IO.write(@markdown_file, context.result.join(''))
-        end
+        context
       end
     end
 
-    class MarkdownParsingContext
+    class ParsingContext
+
+      attr_reader :embedding
+      attr_reader :file_contains_embedding
+      attr_reader :source
+      attr_accessor :result
+      attr_accessor :code_fence_started
+      attr_accessor :code_fence_indentation
+      attr_accessor :fragments_dir
+
       def initialize(markdown_file)
         @source = File.readlines(markdown_file)
         @line_index = 0
@@ -96,13 +155,12 @@ module Jekyll
         end
       end
 
-      attr_reader :embedding
-      attr_reader :file_contains_embedding
-      attr_reader :source
-      attr_accessor :result
-      attr_accessor :code_fence_started
-      attr_accessor :code_fence_indentation
-      attr_accessor :fragments_dir
+      def content_changed?
+        for i in 0..@line_index
+          return true if @source[i] != @result[i]
+        end
+        false
+      end
     end
 
     # An embedding instruction.

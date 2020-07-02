@@ -20,7 +20,7 @@ def config_with_prepared_fragments
   config(true)
 end
 
-def config(prepared_fragments = false, code_includes = nil)
+def config(prepared_fragments = false, code_includes = nil, doc_includes = nil)
   fragments_dir =
       prepared_fragments ? './test/resources/prepared-fragments' : './test/.fragments'
   # noinspection RubyStringKeysInHashInspection
@@ -33,6 +33,9 @@ def config(prepared_fragments = false, code_includes = nil)
   }
   unless code_includes.nil?
     yaml_like_hash['embed_code']['code_includes'] = code_includes
+  end
+  unless doc_includes.nil?
+    yaml_like_hash['embed_code']['doc_includes'] = doc_includes
   end
   Jekyll::Commands::Configuration.new(yaml_like_hash)
 end
