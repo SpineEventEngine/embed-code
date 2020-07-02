@@ -68,8 +68,8 @@ module Jekyll
 
       # Embeds sample code fragments in the documentation file.
       #
-      # This method looks for appearances of `EmbeddingInstruction` followed by the code fence. The code fence
-      # may be not empty, in which case its content will be overwritten.
+      # This method looks for appearances of `EmbeddingInstruction` followed by the code fence.
+      # The code fence  may be not empty, in which case its content will be overwritten.
       #
       # If the file doesn't contain any embedding statements, it is not changed.
       #
@@ -81,6 +81,11 @@ module Jekyll
         end
       end
 
+      # Checks if the code fragments in the documentation file are up-to-date with the original
+      # code examples.
+      #
+      # See +embed+ for updating the code samples.
+      #
       def up_to_date?
         context = construct_embedding
         !context.content_changed?

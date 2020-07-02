@@ -18,6 +18,8 @@
 
 module Jekyll::Commands
 
+  # An error produced when documentation files are not up-to-date with the code of examples.
+  #
   class UnexpectedDiffError < StandardError
 
     def initialize(files)
