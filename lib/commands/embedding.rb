@@ -28,9 +28,9 @@ module Jekyll
     #
     class EmbeddingProcessor
 
-      # @param [String] markdown_file the path to the markdown file
-      def initialize(markdown_file, configuration)
-        @markdown_file = markdown_file
+      # @param [String] doc_file the path to the markdown file
+      def initialize(doc_file, configuration)
+        @doc_file = doc_file
         @configuration = configuration
       end
 
@@ -77,7 +77,7 @@ module Jekyll
         context = construct_embedding
 
         if context.file_contains_embedding && context.content_changed?
-          IO.write(@markdown_file, context.result.join(''))
+          IO.write(@doc_file, context.result.join(''))
         end
       end
 
@@ -94,7 +94,7 @@ module Jekyll
       private
 
       def construct_embedding
-        context = MarkdownParsingContext.new(@markdown_file)
+        context = ParsingContext.new(@doc_file)
 
         current_state = :START
         while current_state != :FINISH
@@ -109,14 +109,14 @@ module Jekyll
             end
           end
           unless accepted
-            raise StandardError, "Failed to parse the doc file `#{@markdown_file}`."
+            raise StandardError, "Failed to parse the doc file `#{@doc_file}`."
           end
         end
         context
       end
     end
 
-    class MarkdownParsingContext
+    class ParsingContext
 
       attr_reader :embedding
       attr_reader :file_contains_embedding
