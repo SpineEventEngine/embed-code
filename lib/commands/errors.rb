@@ -23,7 +23,7 @@ module Jekyll::Commands
   class UnexpectedDiffError < StandardError
 
     def initialize(files)
-      super("Embeddings are not up to date. Some files need to be updated: #{files}")
+      super("Embeddings are not up-to-date. Some files need to be updated: #{files}")
     end
   end
 end

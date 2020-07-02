@@ -34,7 +34,7 @@ module Jekyll::Commands
 
     def self.init_with_program(prog)
       prog.command(:checkCodeSamples) do |c|
-        c.description 'Checks that the doc files are up to date with the sample code.'
+        c.description 'Checks that the doc files are up-to-date with the sample code.'
         c.action { |_, __| process(Configuration.from_file) }
       end
     end
