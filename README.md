@@ -84,7 +84,7 @@ public final class String
         this.hash = original.hash;
     }
 
-    public String(char value[]) {
+    public String(char[] value) {
         this.value = Arrays.copyOf(value, value.length);
     }
     // #enddocfragment "constructors"
