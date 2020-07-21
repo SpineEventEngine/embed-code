@@ -18,17 +18,20 @@
 
 # Finds the maximal common indentation of the given lines.
 #
+# If all the given lines are empty, contain only whitespace, or there are no lines at all,
+# returns zero.
+#
 # @param lines an array of lines which may or may not have leading whitespaces
 # @return the number of leading whitespaces in all the lines except for the empty ones
 def max_common_indentation(lines)
-  min_indentation = Float::INFINITY
+  indent = Float::INFINITY
   lines.each do |line|
     unless line.strip.empty?
-      spaces = line[/\A */].size
-      if spaces < min_indentation
-        min_indentation = spaces
+      spaces = line[/^ */].size
+      if spaces < indent
+        indent = spaces
       end
     end
   end
-  min_indentation
+  indent == Float::INFINITY ? 0 : indent
 end

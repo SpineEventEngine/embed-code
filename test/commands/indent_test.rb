@@ -29,7 +29,12 @@ class IndentationTest < Test::Unit::TestCase
 
   def test_no_lines
     indent = max_common_indentation []
-    assert_equal Float::INFINITY, indent
+    assert_equal 0, indent
+  end
+
+  def test_only_empty_lines
+    indent = max_common_indentation ['', '    ', '']
+    assert_equal 0, indent
   end
 
   def test_2_spaces
