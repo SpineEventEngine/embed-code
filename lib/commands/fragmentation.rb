@@ -338,7 +338,10 @@ module Jekyll::Commands
     # @return contents of the file or nil if it doesn't exist
     def content
       path = absolute_path
-      raise "Fragment file `#{path}` not found." unless File.exist?(path)
+      unless File.exist?(path)
+        raise "Fragment file `#{path}` not found. This may indicate that the file is not included" \
+              'in `code_includes` or is not readable.'
+      end
 
       File.readlines(path)
     end
