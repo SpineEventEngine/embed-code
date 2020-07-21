@@ -104,4 +104,10 @@ class FragmentationTest < Test::Unit::TestCase
     fragment_content = File.read "#{fragment_dir}/#{fragment_files[0]}"
     assert_match(/^$/, fragment_content)
   end
+
+  def test_ignore_binary
+    configuration = config(false, ['**/*.jar'])
+    Jekyll::Commands::Fragmentation.write_fragment_files(configuration)
+    assert_false File.exist?(configuration.fragments_dir)
+  end
 end
