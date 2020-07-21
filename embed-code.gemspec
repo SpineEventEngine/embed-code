@@ -17,16 +17,16 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Gem::Specification.new do |s|
-  s.name = "embed-code"
-  s.version = "0.0.2"
-  s.summary = "Prepares code samples and embeds them into Markdown files"
-  s.authors = ["Spine Event Engine"]
+  s.name = 'embed-code'
+  s.version = '0.0.2'
+  s.summary = 'Prepares code samples and embeds them into Markdown files'
+  s.authors = ['Spine Event Engine']
   s.files = [
-      "lib/embed-code.rb",
-      "lib/commands/command.rb",
-      "lib/commands/embedding.rb",
-      "lib/commands/fragmentation.rb",
-      "lib/commands/configuration.rb",
+      'lib/embed-code.rb',
+      'lib/commands/command.rb',
+      'lib/commands/embedding.rb',
+      'lib/commands/fragmentation.rb',
+      'lib/commands/configuration.rb',
   ]
-  s.require_paths = ["lib"]
+  s.require_paths = ['lib']
 end
