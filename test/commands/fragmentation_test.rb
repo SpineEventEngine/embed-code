@@ -88,7 +88,7 @@ class FragmentationTest < Test::Unit::TestCase
     assert_match(/^[.\n\s]+}\n}$/, fragment_content)
   end
 
-  def fragment_empty_file
+  def test_fragmentize_empty_file
     configuration = config
     file_name = 'Empty.java'
     path = "#{configuration.code_root}/org/example/#{file_name}"
@@ -98,8 +98,6 @@ class FragmentationTest < Test::Unit::TestCase
     fragment_dir = "#{configuration.fragments_dir}/org/example"
     fragment_files = Dir.children(fragment_dir)
     assert_equal 1, fragment_files.size
-
-    fragment_files.delete file_name
 
     fragment_content = File.read "#{fragment_dir}/#{fragment_files[0]}"
     assert_match(/^$/, fragment_content)
