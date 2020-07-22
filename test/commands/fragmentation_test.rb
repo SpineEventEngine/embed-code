@@ -87,4 +87,25 @@ class FragmentationTest < Test::Unit::TestCase
     fragment_content = File.read "#{fragment_dir}/#{fragment_files[0]}"
     assert_match(/^[.\n\s]+}\n}$/, fragment_content)
   end
+
+  def test_fragmentize_empty_file
+    configuration = config
+    file_name = 'Empty.java'
+    path = "#{configuration.code_root}/org/example/#{file_name}"
+    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation.write_fragments
+
+    fragment_dir = "#{configuration.fragments_dir}/org/example"
+    fragment_files = Dir.children(fragment_dir)
+    assert_equal 1, fragment_files.size
+
+    fragment_content = File.read "#{fragment_dir}/#{fragment_files[0]}"
+    assert_match(/^$/, fragment_content)
+  end
+
+  def test_ignore_binary
+    configuration = config(false, ['**/*.jar'])
+    Jekyll::Commands::Fragmentation.write_fragment_files(configuration)
+    assert_false File.exist?(configuration.fragments_dir)
+  end
 end

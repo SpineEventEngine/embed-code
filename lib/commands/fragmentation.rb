@@ -64,11 +64,23 @@ module Jekyll::Commands
       includes.each do |rule|
         pattern = "#{code_root}/#{rule}"
         Dir.glob(pattern) do |code_file|
-          if File.file? code_file
+          if should_fragmentize code_file
             Fragmentation.new(code_file, configuration).write_fragments
           end
         end
       end
+    end
+
+    private_class_method def self.should_fragmentize(fs_object)
+      File.file?(fs_object) && valid_encoding(fs_object)
+    end
+
+    private_class_method def self.valid_encoding(file)
+      lines = File.open(file)
+      for line in lines
+        return false unless line.valid_encoding?
+      end
+      true
     end
 
     # Serializes fragments to the output directory.
@@ -317,12 +329,19 @@ module Jekyll::Commands
       end
     end
 
+    def to_s
+      absolute_path
+    end
+
     # Reads content of the file.
     #
     # @return contents of the file or nil if it doesn't exist
     def content
       path = absolute_path
-      raise "Fragment file `#{path}` not found." unless File.exist?(path)
+      unless File.exist?(path)
+        raise "Fragment file `#{path}` not found. This may indicate that the file is not included" \
+              'in `code_includes` or is not readable.'
+      end
 
       File.readlines(path)
     end
@@ -345,12 +364,15 @@ module Jekyll::Commands
     private
 
     def write_lines(content, open_mode)
-      File.open(absolute_path, open_mode) do |f|
+      File.open(absolute_path, open_mode) do |file|
         indentation = max_common_indentation(content)
         content.each do |line|
-          f.puts(line[indentation..-1])
+          file.puts(line[indentation..-1])
         end
       end
+    rescue StandardError => e
+      puts "Error while writing file #{self}: #{e}"
+      puts e.backtrace
     end
 
     def fragment_hash

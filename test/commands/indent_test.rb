@@ -16,17 +16,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Gem::Specification.new do |s|
-  s.name = 'embed-code'
-  s.version = '0.0.2'
-  s.summary = 'Prepares code samples and embeds them into Markdown files'
-  s.authors = ['Spine Event Engine']
-  s.files = [
-      'lib/embed-code.rb',
-      'lib/commands/command.rb',
-      'lib/commands/embedding.rb',
-      'lib/commands/fragmentation.rb',
-      'lib/commands/configuration.rb',
-  ]
-  s.require_paths = ['lib']
+
+require 'test/unit'
+require_relative '../../lib/commands/indent'
+
+class IndentationTest < Test::Unit::TestCase
+
+  def test_no_spaces
+    indent = max_common_indentation ['', 'foo', 'bar', '', 'baz', '']
+    assert_equal 0, indent
+  end
+
+  def test_no_lines
+    indent = max_common_indentation []
+    assert_equal 0, indent
+  end
+
+  def test_only_empty_lines
+    indent = max_common_indentation ['', '    ', '']
+    assert_equal 0, indent
+  end
+
+  def test_2_spaces
+    indent = max_common_indentation ['', '  foo', '    bar', '', '', '  baz']
+    assert_equal 2, indent
+  end
 end
