@@ -108,4 +108,22 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_equal(1, lines.size)
     assert_equal("public static void main(String[] args) {\n", lines.first)
   end
+
+  def test_no_match_start
+    xml = build_instruction 'org/example/Hello.java', nil, 'foo bar', '*main*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    assert_raise do
+      instruction.content
+    end
+  end
+
+  def test_no_match_end
+    xml = build_instruction 'org/example/Hello.java', nil, '*main*', 'foo bar'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    assert_raise do
+      instruction.content
+    end
+  end
 end
