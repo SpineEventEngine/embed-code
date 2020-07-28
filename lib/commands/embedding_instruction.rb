@@ -86,24 +86,24 @@ module Jekyll::Commands
     private
 
     def matching_lines(lines)
-      start_position = 0
-      line_count = lines.length
-      if @start
-        until start_position >= line_count || File.fnmatch?(@start, lines[start_position])
-          start_position += 1
-        end
-      end
-      end_position = start_position
-      if @end
-        until end_position >= line_count || File.fnmatch(@end, lines[end_position])
-          end_position += 1
-        end
-      else
-        end_position = nil
-      end
+      start_position = @start ? match_glob(@start, lines, 0) : 0
+      end_position = @end ? match_glob(@end, lines, start_position) : nil
+
       required_lines = lines[start_position..end_position]
       indentation = max_common_indentation(required_lines)
       required_lines.map { |line| line[indentation..-1] }
+    end
+
+    def match_glob(pattern, lines, start_from)
+      line_count = lines.length
+      result_line = start_from
+      until result_line >= line_count
+        line = lines[result_line]
+        return result_line if File.fnmatch?(pattern, line)
+
+        result_line += 1
+      end
+      raise "There is no line matching `#{pattern}`."
     end
   end
 end
