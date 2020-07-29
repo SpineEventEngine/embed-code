@@ -24,9 +24,30 @@ the standard `gem` tool. Also, we don't publish `embed-code` into any Gem reposi
 bundle exec jekyll embedCodeSamples
 ```
 
-### In Markdown
+### In the documentation file
 
-#### Named fragments
+Synopsis:
+```
+<?embed-code file="path/to/file" fragment="Fragment Name"?> (I)
+
+OR
+
+<?embed-code file="path/to/file" start="first?line*glob" end="last?line*glob"?> (II)
+```
+
+The instruction must always be followed by a code fence (opening and closing three backticks):
+
+<pre>
+<?embed-code ...?>
+```java
+```
+</pre>
+
+Note that the code fence may specify the syntax in which the code will be highlighted.
+
+This is true even when embedding into HTML.
+
+#### Named fragments (I)
 
 To add a new code sample, add the following construct to the Markdown file:
 
@@ -64,7 +85,7 @@ The pattern syntax supports basic glob constructs:
  - `*` — zero, one, or many arbitrary symbols;
  - `[set]` — one symbol from the given set (equivalent to `[set]` in regular expressions).
 
-### In Code
+### In the code file
 
 The whole file can be embedded without any additional effort.
 
@@ -251,41 +272,3 @@ however, the code fragments are outdated, the command reports an error.
 Under the hood, the command constructs the same code embeddings as does `embedCodeSamples`, but
 instead of changing the doc files, checks if the files on the file system are identical to the ones
 it constructed. If they are not, the process finishes with a non-0 exit code.
-
-## Development
-
-This software is written in Ruby as a plug-in for [Jekyll](https://jekyllrb.com/).
-
-The minimal required version of Ruby is `2.5` (constrained by Jekyll). However, it is recommended to
-use Ruby `2.7` or above, as it has security fixes for issues in `2.5`.
-
-## Testing
-
-Before running tests, make sure to:
-
-1. Install Ruby. Check installation by running:
-    ```
-    ruby -v
-    ```
-2. Install Bundler:
-    ```
-    gem install bundler
-    ```
-3. Install project dependencies:
-    ```
-    bundle install
-    ```
-
-Now, run tests using the `test/run.rb` script:
-```
-ruby ./test/run.rb
-```
-
-When launched on Travis CI, the script also collects and uploads code coverage data.
-
-### IDEA Live Template
-
-```
-// #docfragment "$NAME$"
-// #enddocfragment "$NAME$"
-```
