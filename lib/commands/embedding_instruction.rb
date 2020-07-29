@@ -40,14 +40,14 @@ module Jekyll::Commands
     def initialize(values, configuration)
       @code_file = values['file']
       @fragment = values['fragment']
-      @start = values['start']
-      @end = values['end']
-
+      start_value = values['start']
+      @start = start_value ? Pattern.new(start_value) : nil
+      end_value = values['end']
+      @end = end_value ? Pattern.new(end_value) : nil
       if !@fragment.nil? && (!@start.nil? || !@end.nil?)
         raise ArgumentError,
-              '<?embed-code?> should not specify both a fragment name and start/end patterns.'
+              '<?embed-code?> must NOT specify both a fragment name and start/end patterns.'
       end
-
       @configuration = configuration
     end
 
@@ -99,13 +99,39 @@ module Jekyll::Commands
       result_line = start_from
       until result_line >= line_count
         line = lines[result_line]
-        return result_line if File.fnmatch?(pattern, line)
+        return result_line if pattern.match?(line)
 
         result_line += 1
       end
       raise "There is no line matching `#{pattern}`."
     end
   end
+
+  # A glob-like pattern to match a line of a source file.
+  #
+  class Pattern
+
+    def initialize(glob)
+      pattern = glob
+      start_of_line = glob.start_with?('^')
+      if !start_of_line && !glob.start_with?('*')
+        pattern = '*' + pattern
+      end
+
+      end_of_line = glob.end_with?('$')
+      if !end_of_line && !glob.end_with?('*')
+        pattern += '*'
+      end
+      @pattern = pattern
+    end
+
+    def match?(line)
+      File.fnmatch?(@pattern, line)
+    end
+  end
+
+  private_constant :Pattern
+
 end
 
 module Nokogiri::XML
