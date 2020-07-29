@@ -112,21 +112,32 @@ module Jekyll::Commands
   class Pattern
 
     def initialize(glob)
+      @source_glob = glob
       pattern = glob
       start_of_line = glob.start_with?('^')
       if !start_of_line && !glob.start_with?('*')
         pattern = '*' + pattern
       end
-
+      if start_of_line
+        pattern = pattern[1..nil]
+      end
       end_of_line = glob.end_with?('$')
       if !end_of_line && !glob.end_with?('*')
         pattern += '*'
       end
+      if end_of_line
+        pattern = pattern[0..pattern.length - 2]
+      end
+
       @pattern = pattern
     end
 
     def match?(line)
-      File.fnmatch?(@pattern, line)
+      File.fnmatch?(@pattern, line.chomp)
+    end
+
+    def to_s
+      "Pattern #{@source_glob}"
     end
   end
 
