@@ -43,29 +43,50 @@ The instruction must always be followed by a code fence (opening and closing thr
 ```
 </pre>
 
+The content of the code fence does not matter — the command will overwrite it automatically.
+
 Note that the code fence may specify the syntax in which the code will be highlighted.
 
 This is true even when embedding into HTML.
 
 #### Named fragments (I)
 
+##### Markup fragments
+
+You can mark up the code file to select named fragments like this:
+
+```java
+public final class String
+    implements java.io.Serializable, Comparable<String>, CharSequence {
+    
+    // #docfragment "Constructor"
+    public String() {
+        this.value = new char[0];
+    }
+    // #enddocfragment "Constructor"
+}
+```
+
+The `#docfragment` and `#enddocfragment` tags won't be copied into the resulting code fragment.
+
+##### Add embedding instructions 
+
 To add a new code sample, add the following construct to the Markdown file:
 
 <pre>
 &lt;?embed-code file=&quot;java/lang/String.java&quot;
-             fragment=&quot;constructors&quot; ?&gt;
+             fragment=&quot;Constructor&quot; ?&gt;
 ```java
 ```   
 </pre>
 
-This is an `<?embed-code?>` tag followed by a code fence (with the language you need). The content
-of the code fence does not matter — the command will overwrite it automatically.
-
 The `file` attribute specifies the path to the code file relative to the code root, specified in
 the configuration. The `fragment` attribute specifies the name of the code fragment to embed. Omit
-this attribute to embed the whole file or to use glob patterns.
+this attribute to embed the whole file.
 
-#### Pattern fragments
+You may use any name for your fragments, just omit double quotes (`"`) and symbols forbidden in XML.
+
+#### Pattern fragments (II)
 
 Alternatively, the `<?embed-code?>` tag may have the following form:
 <pre>
@@ -80,49 +101,60 @@ In this case, the fragment is specified by a pair of glob-style patterns. The pa
 the first and the last lines of the desired code fragment. Any of the patterns may be skipped.
 In such a case, the fragment starts at the beginning or ends at the end of the code file.
 
-The pattern syntax supports basic glob constructs:
+The pattern syntax supports an extended glob syntax:
  - `?` — one arbitrary symbol;
  - `*` — zero, one, or many arbitrary symbols;
- - `[set]` — one symbol from the given set (equivalent to `[set]` in regular expressions).
+ - `[set]` — one symbol from the given set (equivalent to `[set]` in regular expressions);
+ - `^` at the start of the pattern to signify the start of the line;
+ - `$` at the end of the pattern to signify the end of the line.
 
-### In the code file
+Note that the `*` symbols at the start and in the end of the pattern are implied. Use `^` and `$` to
+mark that the pattern should not assume `*` at the start/end. 
 
-The whole file can be embedded without any additional effort.
+Note that `^` and `$` work as special characters in their respective positions but not in the middle
+of the pattern. To match the literal `^` symbol at the start of the line, prepend it with another
+`^`. Similarly, to match a literal `$` at the end of the line, append it with another `$`.
 
-You can mark up the code file to select named fragments like this:
+## Configuration
 
-```java
-public final class String
-    implements java.io.Serializable, Comparable<String>, CharSequence {
-    
-    // #docfragment "constructors"
-    public String() {
-        this.value = new char[0];
-    }
+In order for the command to work, you need to specify at least two configurations params:
+ - `code_root` — the directory where all the embedded code resides;
+ - `documentation_root` — the directory where all the docs which need embedding reside.
 
-    public String(String original) {
-        this.value = original.value;
-        this.hash = original.hash;
-    }
+Those parameters should be specified via the Jekyll `_config.yml` file.
 
-    public String(char[] value) {
-        this.value = Arrays.copyOf(value, value.length);
-    }
-    // #enddocfragment "constructors"
-}
+For example:
+```yaml
+embed_code:
+  code_root: ./_samples
+  documentation_root: ./docs
+
+  # Optional params:
+  code_includes: ["**/*.java", "**/*.gradle"]
+  doc_includes:  ["docs/*.md", "docs/*.html"]
+  fragments_dir: ".fragments"
+  separator: "..."
 ```
 
-The `#docfragment` and `#enddocfragment` tags won't be copied into the resulting code fragment.
+Other command configuration parameters include:
+ - `code_includes` — a list of glob patterns defining which code files to consider. By default,
+   all files (`**/*`).
+ - `doc_includes` — a list of glob patterns defining which doc files to consider. By default,
+   Markdown and HTML files (`**/*.md`, `**/*.html`).
+ - `fragments_dir` — a temporary directory for fragment files. The command extracts the code
+   fragments files and stores them in a temporary dir. Consider adding this directory to
+   `.gitignore`. By default, `./.fragments`
+ - `separator` — a string which separates partitions of a single fragment in the resulting embedded
+   code. See [fragment doc](#more-on-fragments) for more. The separator is automatically appended
+   with a new line symbol. By default, `...`.
 
-#### Fragment Naming
+## Advanced use cases
 
-You may use any name for your fragments, just omit double quotes (`"`) and symbols forbidden in XML.
+### Joining several parts of code into one fragment
 
-#### More on Fragments
-
-A fragment may consist of one or several pieces declared in a single file. When rendered, the pieces
-which belong to a single fragment are joined together. One may also specify the text inserted in
-each joint point (see [Configuration](#configuration) for the corresponding parameter).
+A named fragment may consist of one or several pieces declared in a single file. When rendered,
+the pieces which belong to a single fragment are joined together. One may also specify the text
+inserted in each joint point (see [Configuration](#configuration) for the corresponding parameter).
 
 Here is an example of how a re-occurring fragment is rendered.
 
@@ -139,7 +171,7 @@ public final class String
     }
     // #enddocfragment "Standard Object methods"
     
-    /* here goes irrelevant code */
+    /* Here goes irrelevant code */
 
     // #docfragment "Standard Object methods"
     public boolean equals(Object anObject) {
@@ -148,7 +180,7 @@ public final class String
     }
     // #enddocfragment "Standard Object methods"
 
-    /* here goes more irrelevant code */
+    /* Here goes more irrelevant code */
 
     // #docfragment "Standard Object methods"
     public String toString() {
@@ -220,41 +252,8 @@ The fragments can be used in other languages too:
 </body>
 </html>
 ```
-
-### Configuration
-
-In order for the command to work, you need to specify at least two configurations params:
- - `code_root` — the directory where all the embedded code resides;
- - `documentation_root` — the directory where all the docs which need embedding reside.
-
-Those parameters should be specified via the Jekyll `_config.yml` file.
-
-For example:
-```yaml
-embed_code:
-  code_root: ./_samples
-  documentation_root: ./docs
-
-  # Optional params:
-  code_includes: ["**/*.java", "**/*.gradle"]
-  doc_includes:  ["docs/*.md", "docs/*.html"]
-  fragments_dir: ".fragments"
-  separator: "..."
-```
-
-Other command configuration parameters include:
- - `code_includes` — a list of glob patterns defining which code files to consider. By default,
-   all files (`**/*`).
- - `doc_includes` — a list of glob patterns defining which doc files to consider. By default,
-   Markdown and HTML files (`**/*.md`, `**/*.html`).
- - `fragments_dir` — a temporary directory for fragment files. The command extracts the code
-   fragments files and stores them in a temporary dir. Consider adding this directory to
-   `.gitignore`. By default, `./.fragments`
- - `separator` — a string which separates partitions of a single fragment in the resulting embedded
-   code. See [fragment doc](#more-on-fragments) for more. The separator is automatically appended
-   with a new line symbol. By default, `...`.
    
-## Checking if embeddings are up-to-date
+### Checking if embeddings are up-to-date
 
 Sometimes, instead of updating code embeddings in doc files, you just want to make sure that
 the doc is up-to-date with the code examples. It might be helpful to perform that check on CI when
