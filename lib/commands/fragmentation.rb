@@ -271,7 +271,11 @@ module Jekyll::Commands
         end
 
         text = ''
-        partition_lines.each do |part_text|
+
+        partition_lines.each_with_index do |part_text, index|
+          if index != 0
+            text += configuration.separator + "\n"
+          end
           part_text.each do |line|
             text += line[common_indentation..-1]
           end
