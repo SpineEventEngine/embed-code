@@ -9,6 +9,7 @@ public class Main {
         System.out.println("This is just a log message.");
         // #docfragment "Main"
         System.out.println(helperMethod());
+
     }
     // #enddocfragment "Main"
 

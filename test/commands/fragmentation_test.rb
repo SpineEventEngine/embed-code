@@ -128,8 +128,9 @@ class FragmentationTest < Test::Unit::TestCase
     assert_match(/\s{4}public.*/, fragment_lines[2])
     assert_equal(configuration.separator, fragment_lines[3])
     assert_match(/\s{8}System.*/, fragment_lines[4])
-    assert_equal('    }', fragment_lines[5])
-    assert_equal(configuration.separator, fragment_lines[6])
-    assert_equal('}', fragment_lines[7])
+    assert_equal('', fragment_lines[5])
+    assert_equal('    }', fragment_lines[6])
+    assert_equal(configuration.separator, fragment_lines[7])
+    assert_equal('}', fragment_lines[8])
   end
 end
