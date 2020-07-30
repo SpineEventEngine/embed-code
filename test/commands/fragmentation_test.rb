@@ -108,4 +108,28 @@ class FragmentationTest < Test::Unit::TestCase
     Jekyll::Commands::Fragmentation.write_fragment_files(configuration)
     assert_false File.exist?(configuration.fragments_dir)
   end
+
+  def test_many_partitions
+    configuration = config
+    file_name = 'Complex.java'
+    path = "#{configuration.code_root}/org/example/#{file_name}"
+    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation.write_fragments
+
+    fragment_dir = "#{configuration.fragments_dir}/org/example"
+    fragment_files = Dir.children(fragment_dir)
+    assert_equal 2, fragment_files.size
+
+    fragment_files.delete file_name
+
+    fragment_lines = File.readlines("#{fragment_dir}/#{fragment_files[0]}", chomp: true)
+    assert_equal('public class Main {', fragment_lines[0])
+    assert_equal(configuration.separator, fragment_lines[1])
+    assert_match(/\s{4}public.*/, fragment_lines[2])
+    assert_equal(configuration.separator, fragment_lines[3])
+    assert_match(/\s{8}System.*/, fragment_lines[4])
+    assert_equal('    }', fragment_lines[5])
+    assert_equal(configuration.separator, fragment_lines[6])
+    assert_equal('}', fragment_lines[7])
+  end
 end
