@@ -277,7 +277,11 @@ module Jekyll::Commands
             text += configuration.separator + "\n"
           end
           part_text.each do |line|
-            text += line[common_indentation..-1]
+            if line.strip.empty?
+              text += line
+            else
+              text += line[common_indentation..-1]
+            end
           end
         end
         text.freeze
