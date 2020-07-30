@@ -275,7 +275,6 @@ module Jekyll::Commands
           part_text.each do |line|
             text += line[common_indentation..-1]
           end
-          text += configuration.separator + "\n"
         end
         text.freeze
       end
@@ -367,29 +366,15 @@ module Jekyll::Commands
     #
     # Overwrites the file if it exists.
     def write(content)
-      write_lines content, 'w+'
-    end
-
-    def append(content)
-      write_lines content, 'a+'
-    end
-
-    def exists?
-      File.exist? absolute_path
-    end
-
-    private
-
-    def write_lines(content, open_mode)
-      File.open(absolute_path, open_mode) do |file|
-        content.each do |line|
-          file.puts(line)
-        end
+      File.open(absolute_path, 'w+') do |file|
+        file.puts(content)
       end
     rescue StandardError => e
       puts "Error while writing file #{self}: #{e}"
       puts e.backtrace
     end
+
+    private
 
     def fragment_hash
       # Allows to use any characters in a fragment name
