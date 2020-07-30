@@ -255,17 +255,37 @@ module Jekyll::Commands
       @name == DEFAULT_FRAGMENT
     end
 
-    def write_to(file, all_lines, configuration)
+    def text(all_lines, configuration)
       if is_default?
-        file.write(all_lines)
+        all_lines.freeze
       else
-        first_partition = @partitions[0]
-        file.write(first_partition.select(all_lines))
-        @partitions[1..nil].each do |part|
-          file.append("#{configuration.separator}\n")
-          file.append(part.select(all_lines))
+        common_indentation = Float::INFINITY
+        partition_lines = []
+        @partitions.each do |part|
+          partition_text = part.select(all_lines)
+          partition_lines.append(partition_text)
+          indent = max_common_indentation(partition_text)
+          if indent < common_indentation
+            common_indentation = indent
+          end
         end
+
+        text = ''
+
+        partition_lines.each_with_index do |part_text, index|
+          if index != 0
+            text += configuration.separator + "\n"
+          end
+          part_text.each do |line|
+            text += line[common_indentation..-1]
+          end
+        end
+        text.freeze
       end
+    end
+
+    def write_to(file, all_lines, configuration)
+      file.write(text(all_lines, configuration))
     end
   end
 
@@ -350,34 +370,19 @@ module Jekyll::Commands
     #
     # Overwrites the file if it exists.
     def write(content)
-      write_lines content, 'w+'
-    end
-
-    def append(content)
-      write_lines content, 'a+'
-    end
-
-    def exists?
-      File.exist? absolute_path
-    end
-
-    private
-
-    def write_lines(content, open_mode)
-      File.open(absolute_path, open_mode) do |file|
-        indentation = max_common_indentation(content)
-        content.each do |line|
-          file.puts(line[indentation..-1])
-        end
+      File.open(absolute_path, 'w+') do |file|
+        file.puts(content)
       end
     rescue StandardError => e
       puts "Error while writing file #{self}: #{e}"
       puts e.backtrace
     end
 
+    private
+
     def fragment_hash
       # Allows to use any characters in a fragment name
-      (Digest::SHA1.hexdigest @fragment_name)[0..7]
+      Digest::SHA1.hexdigest(@fragment_name)[0..7]
     end
   end
 end

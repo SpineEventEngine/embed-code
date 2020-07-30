@@ -108,4 +108,52 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_equal(1, lines.size)
     assert_equal("public static void main(String[] args) {\n", lines.first)
   end
+
+  def test_no_match_start
+    xml = build_instruction 'org/example/Hello.java', nil, 'foo bar', '*main*'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    assert_raise do
+      instruction.content
+    end
+  end
+
+  def test_no_match_end
+    xml = build_instruction 'org/example/Hello.java', nil, '*main*', 'foo bar'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    assert_raise do
+      instruction.content
+    end
+  end
+
+  def test_imply_asterisk
+    xml = build_instruction 'org/example/Hello.java', nil, 'main', 'world'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_equal(2, lines.size)
+    assert_true(lines.first.start_with?('public static void main'))
+    assert_true(lines.last.start_with?('    System.out.println'))
+  end
+
+  def test_explicit_line_start
+    xml = build_instruction 'plain-text-to-embed.txt', nil, '^foo', '^bar'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_equal(4, lines.size)
+    assert_equal("foo — this line starts with it\n", lines.first)
+    assert_equal("bar — this line starts with it\n", lines.last)
+  end
+
+  def test_explicit_line_end
+    xml = build_instruction 'plain-text-to-embed.txt', nil, 'foo$', 'bar$'
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    lines = instruction.content
+    assert_equal(6, lines.size)
+    assert_equal("This line ends with foo\n", lines.first)
+    assert_equal("This line ends with bar\n", lines.last)
+  end
 end
