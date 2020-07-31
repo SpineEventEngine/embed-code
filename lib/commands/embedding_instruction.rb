@@ -91,9 +91,7 @@ module Jekyll::Commands
 
       required_lines = lines[start_position..end_position]
       indentation = max_common_indentation(required_lines)
-      required_lines.map do |line|
-        line.strip.empty? ? line : line[indentation..-1]
-      end
+      cut_indent(required_lines, indentation)
     end
 
     def match_glob(pattern, lines, start_from)

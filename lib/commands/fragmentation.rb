@@ -276,13 +276,7 @@ module Jekyll::Commands
           if index != 0
             text += configuration.separator + "\n"
           end
-          part_text.each do |line|
-            if line.strip.empty?
-              text += line
-            else
-              text += line[common_indentation..-1]
-            end
-          end
+          cut_indent(part_text, common_indentation)
         end
         text.freeze
       end

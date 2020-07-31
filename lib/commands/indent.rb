@@ -35,3 +35,11 @@ def max_common_indentation(lines)
   end
   indent == Float::INFINITY ? 0 : indent
 end
+
+# Reduces indentation to the given target amount.
+#
+def cut_indent(lines, target_space_count)
+  lines.map do |line|
+    line.strip.empty? ? line : line[target_space_count..-1]
+  end
+end
