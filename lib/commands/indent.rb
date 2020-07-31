@@ -38,8 +38,8 @@ end
 
 # Reduces indentation to the given target amount.
 #
-def cut_indent(lines, redundant_space_count)
+def cut_indent(lines, redundant_spaces)
   lines.map do |line|
-    line.strip.empty? ? line : line[redundant_space_count..-1]
+    line.strip.empty? ? line : line[redundant_spaces..-1]
   end
 end
