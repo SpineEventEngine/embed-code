@@ -18,7 +18,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'embed-code'
-  s.version = '0.0.3'
+  s.version = '0.0.4'
   s.summary = 'Prepares code samples and embeds them into Markdown files'
   s.authors = ['Spine Event Engine']
   s.files = [
