@@ -121,12 +121,15 @@ module Jekyll
       attr_reader :embedding
       attr_reader :file_contains_embedding
       attr_reader :source
+      attr_reader :markdown_file
+      attr_reader :line_index
       attr_accessor :result
       attr_accessor :code_fence_started
       attr_accessor :code_fence_indentation
       attr_accessor :fragments_dir
 
       def initialize(markdown_file)
+        @markdown_file = markdown_file
         @source = File.readlines(markdown_file)
         @line_index = 0
         @result = []
@@ -255,6 +258,8 @@ module Jekyll
           indentation = ' ' * context.code_fence_indentation
           context.result.push(indentation + line)
         end
+      rescue StandardError => e
+        puts "Failed to render #{context.markdown_file}:#{context.line_index}: #{e}"
       end
     end
 
