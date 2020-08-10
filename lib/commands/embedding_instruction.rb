@@ -26,7 +26,7 @@ module Jekyll::Commands
 
   # Specifies the code fragment to embed into a Markdown file, and the embedding parameters.
   #
-  # Takes form of an XML processing instruction <?embed-code file="..." fragment="..."?>.
+  # Takes form of an XML processing instruction <embed-code file="..." fragment="..."/>.
   #
   # The following parameters are currently supported:
   # * 'file' a mandatory relative path to the file with the code
@@ -34,7 +34,7 @@ module Jekyll::Commands
   # the whole file is embedded.
   #
   class EmbeddingInstruction
-    STATEMENT = '<?embed-code'.freeze
+    STATEMENT = '<embed-code'.freeze
     TAG_NAME = 'embed-code'.freeze
 
     def initialize(values, configuration)
@@ -46,19 +46,19 @@ module Jekyll::Commands
       @end = end_value ? Pattern.new(end_value) : nil
       if !@fragment.nil? && (!@start.nil? || !@end.nil?)
         raise ArgumentError,
-              '<?embed-code?> must NOT specify both a fragment name and start/end patterns.'
+              '<embed-code> must NOT specify both a fragment name and start/end patterns.'
       end
       @configuration = configuration
     end
 
-    # Reads the instruction from the '<?embed-code?>' XML tag.
+    # Reads the instruction from the '<embed-code>' XML tag.
     #
     # @param [Object] line line with the XML
     # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
       begin
         document = Nokogiri::XML(line)
-        instruction = document.at_xpath("//processing-instruction('#{TAG_NAME}')")
+        instruction = document.at_xpath("//#{TAG_NAME}")
       rescue StandardError => e
         puts e
         return nil
@@ -66,8 +66,7 @@ module Jekyll::Commands
       if instruction.nil?
         return nil
       end
-      tag = instruction.to_element
-      fields = tag.attributes.map { |name, value| [name, value.to_s] }.to_h
+      fields = instruction.attributes.map { |name, value| [name, value.to_s] }.to_h
       EmbeddingInstruction.new(fields, configuration)
     end
 
@@ -143,20 +142,4 @@ module Jekyll::Commands
 
   private_constant :Pattern
 
-end
-
-module Nokogiri::XML
-  # Extends Nokogiri's class with 'to_element' method.
-  #
-  class ProcessingInstruction
-
-    # Creates new element based on the content of this processing instruction.
-    #
-    # Processing instruction don't have attributes, their content is treated as a raw string value. We need to parse
-    # it as an Element to gain programmatic access to the attributes.
-    #
-    def to_element
-      document.parse("<#{name} #{content}/>")[0]
-    end
-  end
 end

@@ -48,7 +48,7 @@ def build_instruction(file_name, fragment = nil, start_glob = nil, end_glob = ni
   fragment_attr = xml_attribute 'fragment', fragment
   start_attr = xml_attribute 'start', start_glob
   end_attr = xml_attribute 'end', end_glob
-  "<?embed-code file=\"#{file_name}\" #{fragment_attr} #{start_attr} #{end_attr}?>"
+  "<embed-code file=\"#{file_name}\" #{fragment_attr} #{start_attr} #{end_attr}/>"
 end
 
 def delete_dir(path)
