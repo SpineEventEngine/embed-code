@@ -30,6 +30,13 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
     assert_not_nil(instruction)
   end
 
+  def test_parse_with_closing_tag
+    xml = build_instruction 'org/example/Hello.java', 'Hello class', nil, nil, true
+    configuration = config_with_prepared_fragments
+    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    assert_not_nil(instruction)
+  end
+
   def test_read_fragment_dir
     xml = build_instruction 'org/example/Hello.java'
     configuration = config_with_prepared_fragments
