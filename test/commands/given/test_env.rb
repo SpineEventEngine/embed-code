@@ -44,11 +44,12 @@ def prepare_docs(source)
   FileUtils.copy_entry source, config.documentation_root
 end
 
-def build_instruction(file_name, fragment = nil, start_glob = nil, end_glob = nil)
+def build_instruction(file_name, fragment = nil, start_glob = nil, end_glob = nil, close_tag = false)
   fragment_attr = xml_attribute 'fragment', fragment
   start_attr = xml_attribute 'start', start_glob
   end_attr = xml_attribute 'end', end_glob
-  "<?embed-code file=\"#{file_name}\" #{fragment_attr} #{start_attr} #{end_attr}?>"
+
+  "<embed-code file=\"#{file_name}\" #{fragment_attr} #{start_attr} #{end_attr}#{close_tag ? '></embed-code>' : '/>'}"
 end
 
 def delete_dir(path)

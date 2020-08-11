@@ -28,17 +28,17 @@ bundle exec jekyll embedCodeSamples
 
 Synopsis:
 ```
-<?embed-code file="path/to/file" fragment="Fragment Name"?> (I)
+<embed-code file="path/to/file" fragment="Fragment Name"/> (I)
 
 OR
 
-<?embed-code file="path/to/file" start="first?line*glob" end="last?line*glob"?> (II)
+<embed-code file="path/to/file" start="first?line*glob" end="last?line*glob"/> (II)
 ```
 
 The instruction must always be followed by a code fence (opening and closing three backticks):
 
 <pre>
-<?embed-code ...?>
+<embed-code .../>
 ```java
 ```
 </pre>
@@ -74,8 +74,8 @@ The `#docfragment` and `#enddocfragment` tags won't be copied into the resulting
 To add a new code sample, add the following construct to the Markdown file:
 
 <pre>
-&lt;?embed-code file=&quot;java/lang/String.java&quot;
-             fragment=&quot;Constructor&quot; ?&gt;
+&lt;embed-code file=&quot;java/lang/String.java&quot;
+             fragment=&quot;Constructor&quot;/&gt;
 ```java
 ```   
 </pre>
@@ -88,11 +88,11 @@ You may use any name for your fragments, just omit double quotes (`"`) and symbo
 
 #### Pattern fragments (II)
 
-Alternatively, the `<?embed-code?>` tag may have the following form:
+Alternatively, the `<embed-code>` tag may have the following form:
 <pre>
-&lt;?embed-code file=&quot;java/lang/String.java&quot;
+&lt;embed-code file=&quot;java/lang/String.java&quot;
              start=&quot;*class Hello*&quot;
-             end=&quot;}*&quot;?&gt;
+             end=&quot;}*&quot;/&gt;
 ```java
 ```   
 </pre>
