@@ -28,17 +28,17 @@ bundle exec jekyll embedCodeSamples
 
 Synopsis:
 ```
-<embed-code file="path/to/file" fragment="Fragment Name"/> (I)
+<embed-code file="path/to/file" fragment="Fragment Name"></embed-code> (I)
 
 OR
 
-<embed-code file="path/to/file" start="first?line*glob" end="last?line*glob"/> (II)
+<embed-code file="path/to/file" start="first?line*glob" end="last?line*glob"></embed-code> (II)
 ```
 
 The instruction must always be followed by a code fence (opening and closing three backticks):
 
 <pre>
-<embed-code .../>
+<embed-code ...></embed-code>
 ```java
 ```
 </pre>
@@ -75,7 +75,7 @@ To add a new code sample, add the following construct to the Markdown file:
 
 <pre>
 &lt;embed-code file=&quot;java/lang/String.java&quot;
-             fragment=&quot;Constructor&quot;/&gt;
+             fragment=&quot;Constructor&quot;&gt;&lt;/embed-code&gt;
 ```java
 ```   
 </pre>
@@ -92,7 +92,7 @@ Alternatively, the `<embed-code>` tag may have the following form:
 <pre>
 &lt;embed-code file=&quot;java/lang/String.java&quot;
              start=&quot;*class Hello*&quot;
-             end=&quot;}*&quot;/&gt;
+             end=&quot;}*&quot;&gt;&lt;/embed-code&gt;
 ```java
 ```   
 </pre>
