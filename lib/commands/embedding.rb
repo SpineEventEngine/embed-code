@@ -109,7 +109,7 @@ module Jekyll
             end
           end
           unless accepted
-            raise StandardError, "Failed to parse the doc file `#{@doc_file}`."
+            raise StandardError, "Failed to parse the doc file `#{@doc_file}`. Context: #{context}"
           end
         end
         context
@@ -164,6 +164,10 @@ module Jekyll
         end
         false
       end
+
+      def to_s
+        "ParsingContext[embedding=`#{@embedding}`, file=`#{@markdown_file}`, line=`#{@line_index}`]"
+      end
     end
 
     # An embedding instruction.
@@ -193,7 +197,7 @@ module Jekyll
           end
         end
         unless context.embedding
-          raise StandardError, 'Failed to parse an embedding instruction'
+          raise StandardError, "Failed to parse an embedding instruction. Context: #{context}"
         end
       end
     end
@@ -209,6 +213,24 @@ module Jekyll
         context.to_next_line
       end
     end
+
+    # A blank line dividing the embedding instruction and the code fence.
+    #
+    # The line may be used for formatting purposes. It is harmless and has no effect of the overall
+    # tool behaviour.
+    #
+    class BlankLine
+      def recognize(context)
+        return false unless context.current_line.strip.empty?
+
+        !context.reached_eof && !context.code_fence_started && context.embedding
+      end
+
+        def accept(context, _)
+          context.result.push(context.current_line)
+          context.to_next_line
+        end
+      end
 
     # An opening "bracket" of the code fence.
     class CodeFenceStart
@@ -289,6 +311,7 @@ module Jekyll
     STATE_TO_TRANSITION = {
         REGULAR_LINE: RegularLine.new,
         EMBEDDING_INSTRUCTION: EmbedInstructionToken.new,
+        BLANK_LINE: BlankLine.new,
         CODE_FENCE_START: CodeFenceStart.new,
         CODE_FENCE_END: CodeFenceEnd.new,
         CODE_SAMPLE_LINE: CodeSampleLine.new,
@@ -300,7 +323,8 @@ module Jekyll
     TRANSITIONS = {
         START: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
         REGULAR_LINE: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE],
-        EMBEDDING_INSTRUCTION: [:CODE_FENCE_START],
+        EMBEDDING_INSTRUCTION: [:CODE_FENCE_START, :BLANK_LINE],
+        BLANK_LINE: [:CODE_FENCE_START, :BLANK_LINE],
         CODE_FENCE_START: [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
         CODE_SAMPLE_LINE: [:CODE_FENCE_END, :CODE_SAMPLE_LINE],
         CODE_FENCE_END: [:FINISH, :EMBEDDING_INSTRUCTION, :REGULAR_LINE]

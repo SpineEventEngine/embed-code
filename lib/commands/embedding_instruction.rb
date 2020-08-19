@@ -57,10 +57,9 @@ module Jekyll::Commands
     # @param [Configuration] configuration tool configuration
     def self.from_xml(line, configuration)
       begin
-        document = Nokogiri::XML(line)
+        document = Nokogiri::XML(line, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
         instruction = document.at_xpath("//#{TAG_NAME}")
-      rescue StandardError => e
-        puts e
+      rescue StandardError
         return nil
       end
       if instruction.nil?
@@ -80,6 +79,11 @@ module Jekyll::Commands
       else
         file.content
       end
+    end
+
+    def to_s
+      "EmbeddingInstruction[file=`#{@code_file}`, fragment=`#{@fragment}`, " \
+                           "start=`#{@start}`, end=`#{@end}`]"
     end
 
     private

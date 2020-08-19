@@ -23,6 +23,8 @@ require_relative './given/test_env'
 
 class EmbedCodeSamplesTest < Test::Unit::TestCase
 
+  MAIN_METHOD_REGEX = /^public static void main.*/
+
   def setup
     @config = config(false, ['**/Hello.java'])
     prepare_docs './test/resources/docs'
@@ -34,15 +36,31 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
   end
 
   def test_process_files
-    main_method_regex = /^public static void main.*/
-
     doc_file = "#{@config.documentation_root}/doc.md"
     initial_content = File.read doc_file
-    assert_no_match(main_method_regex, initial_content)
+    assert_no_match(MAIN_METHOD_REGEX, initial_content)
 
     Jekyll::Commands::EmbedCodeSamples.process(@config)
 
     updated_content = File.read doc_file
-    assert_match(main_method_regex, updated_content)
+    assert_match(MAIN_METHOD_REGEX, updated_content)
+  end
+
+  def test_allow_splitting_tag
+    doc_file = "#{@config.documentation_root}/split-lines.md"
+
+    Jekyll::Commands::EmbedCodeSamples.process(@config)
+
+    updated_content = File.read doc_file
+    assert_match(MAIN_METHOD_REGEX, updated_content)
+  end
+
+  def test_mind_the_gap
+    doc_file = "#{@config.documentation_root}/blank-line.md"
+
+    Jekyll::Commands::EmbedCodeSamples.process(@config)
+
+    updated_content = File.read doc_file
+    assert_match(MAIN_METHOD_REGEX, updated_content)
   end
 end
