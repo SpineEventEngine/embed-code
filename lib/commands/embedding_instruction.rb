@@ -82,6 +82,11 @@ module Jekyll::Commands
       end
     end
 
+    def to_s
+      "EmbeddingInstruction[file=`#{@code_file}`, fragment=`#{@fragment}`, " \
+                           "start=`#{@start}`, end=`#{@end}`]"
+    end
+
     private
 
     def matching_lines(lines)

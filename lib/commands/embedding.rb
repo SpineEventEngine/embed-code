@@ -109,7 +109,7 @@ module Jekyll
             end
           end
           unless accepted
-            raise StandardError, "Failed to parse the doc file `#{@doc_file}`."
+            raise StandardError, "Failed to parse the doc file `#{@doc_file}`. Context: #{context}"
           end
         end
         context
@@ -163,6 +163,10 @@ module Jekyll
           return true if @source[i] != @result[i]
         end
         false
+      end
+
+      def to_s
+        "ParsingContext[embedding=`#{@embedding}`, file=`#{@markdown_file}`, line=`#{@line_index}`]"
       end
     end
 
