@@ -197,7 +197,7 @@ module Jekyll
           end
         end
         unless context.embedding
-          raise StandardError, 'Failed to parse an embedding instruction'
+          raise StandardError, "Failed to parse an embedding instruction. Context: #{context}"
         end
       end
     end
