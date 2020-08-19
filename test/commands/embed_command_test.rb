@@ -54,4 +54,13 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
     updated_content = File.read doc_file
     assert_match(MAIN_METHOD_REGEX, updated_content)
   end
+
+  def test_mind_the_gap
+    doc_file = "#{@config.documentation_root}/blank-line.md"
+
+    Jekyll::Commands::EmbedCodeSamples.process(@config)
+
+    updated_content = File.read doc_file
+    assert_match(MAIN_METHOD_REGEX, updated_content)
+  end
 end
