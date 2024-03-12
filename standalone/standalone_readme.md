@@ -11,3 +11,7 @@ To create .exe you should:
    ```bash
    ocran <scriptname>.rb
    ```
+
+Take a note that the ocran runs your script on start. You can disable this behaviour with setting flag __--no-dep-run__. But in this case you cannot be sure that all your code and dependencies will be included in a binary file. 
+Better solution is to support default launching of your script.
+For example, if your script relies on command line arguments, you may provide default values for them.
