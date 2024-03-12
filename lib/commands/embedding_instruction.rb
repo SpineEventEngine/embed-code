@@ -17,12 +17,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'nokogiri'
-require 'jekyll'
 
 require_relative 'fragmentation'
 require_relative 'indent'
 
-module Jekyll::Commands
+module EmbedCode
 
   # Specifies the code fragment to embed into a Markdown file, and the embedding parameters.
   #

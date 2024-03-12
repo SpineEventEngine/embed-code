@@ -40,7 +40,7 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
     initial_content = File.read doc_file
     assert_no_match(MAIN_METHOD_REGEX, initial_content)
 
-    Jekyll::Commands::EmbedCodeSamples.process(@config)
+    EmbedCode::EmbedCodeSamples.process(@config)
 
     updated_content = File.read doc_file
     assert_match(MAIN_METHOD_REGEX, updated_content)
@@ -49,7 +49,7 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
   def test_allow_splitting_tag
     doc_file = "#{@config.documentation_root}/split-lines.md"
 
-    Jekyll::Commands::EmbedCodeSamples.process(@config)
+    EmbedCode::EmbedCodeSamples.process(@config)
 
     updated_content = File.read doc_file
     assert_match(MAIN_METHOD_REGEX, updated_content)
@@ -58,7 +58,7 @@ class EmbedCodeSamplesTest < Test::Unit::TestCase
   def test_mind_the_gap
     doc_file = "#{@config.documentation_root}/blank-line.md"
 
-    Jekyll::Commands::EmbedCodeSamples.process(@config)
+    EmbedCode::EmbedCodeSamples.process(@config)
 
     updated_content = File.read doc_file
     assert_match(MAIN_METHOD_REGEX, updated_content)

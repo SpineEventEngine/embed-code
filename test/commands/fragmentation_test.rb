@@ -32,7 +32,7 @@ class FragmentationTest < Test::Unit::TestCase
     configuration = config
     file_name = 'Hello.java'
     path = "#{configuration.code_root}/org/example/#{file_name}"
-    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation = EmbedCode::Fragmentation.new(path, configuration)
     fragmentation.write_fragments
 
     fragment_children = Dir.children(configuration.fragments_dir)
@@ -52,20 +52,20 @@ class FragmentationTest < Test::Unit::TestCase
 
   def test_requires_code_file
     assert_raise ArgumentError do
-      Jekyll::Commands::Fragmentation.new(nil, config)
+      EmbedCode::Fragmentation.new(nil, config)
     end
   end
 
   def test_requires_config
     assert_raise ArgumentError do
-      Jekyll::Commands::Fragmentation.new('foo/bar', nil)
+      EmbedCode::Fragmentation.new('foo/bar', nil)
     end
   end
 
   def test_fail_not_open_fragment
     configuration = config
     path = "#{configuration.code_root}/org/example/Unopen.java"
-    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation = EmbedCode::Fragmentation.new(path, configuration)
     assert_raise do
       fragmentation.write_fragments
     end
@@ -75,7 +75,7 @@ class FragmentationTest < Test::Unit::TestCase
     configuration = config
     file_name = 'Unclosed.java'
     path = "#{configuration.code_root}/org/example/#{file_name}"
-    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation = EmbedCode::Fragmentation.new(path, configuration)
     fragmentation.write_fragments
 
     fragment_dir = "#{configuration.fragments_dir}/org/example"
@@ -92,7 +92,7 @@ class FragmentationTest < Test::Unit::TestCase
     configuration = config
     file_name = 'Empty.java'
     path = "#{configuration.code_root}/org/example/#{file_name}"
-    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation = EmbedCode::Fragmentation.new(path, configuration)
     fragmentation.write_fragments
 
     fragment_dir = "#{configuration.fragments_dir}/org/example"
@@ -105,7 +105,7 @@ class FragmentationTest < Test::Unit::TestCase
 
   def test_ignore_binary
     configuration = config(false, ['**/*.jar'])
-    Jekyll::Commands::Fragmentation.write_fragment_files(configuration)
+    EmbedCode::Fragmentation.write_fragment_files(configuration)
     assert_false File.exist?(configuration.fragments_dir)
   end
 
@@ -113,7 +113,7 @@ class FragmentationTest < Test::Unit::TestCase
     configuration = config
     file_name = 'Complex.java'
     path = "#{configuration.code_root}/org/example/#{file_name}"
-    fragmentation = Jekyll::Commands::Fragmentation.new(path, configuration)
+    fragmentation = EmbedCode::Fragmentation.new(path, configuration)
     fragmentation.write_fragments
 
     fragment_dir = "#{configuration.fragments_dir}/org/example"

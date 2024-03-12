@@ -16,7 +16,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require('jekyll')
 require_relative('configuration')
 require_relative('embedding')
 require_relative('fragmentation')
@@ -25,19 +24,12 @@ require_relative('fragmentation')
 #   bundle exec jekyll checkCodeSamples
 #
 
-module Jekyll::Commands
+module EmbedCode
 
-  # Command which checks if code embeddings in the documentation files are up-to-date with the code
+  # Class which checks if code embeddings in the documentation files are up-to-date with the code
   # of the examples.
   #
-  class CheckCodeSamples < Jekyll::Command
-
-    def self.init_with_program(prog)
-      prog.command(:checkCodeSamples) do |c|
-        c.description 'Checks that the doc files are up-to-date with the sample code.'
-        c.action { |_, __| process(Configuration.from_file) }
-      end
-    end
+  class CheckCodeSamples
 
     def self.process(configuration)
       Fragmentation.write_fragment_files configuration

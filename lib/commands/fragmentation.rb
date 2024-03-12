@@ -21,7 +21,7 @@ require 'digest/sha1'
 require_relative 'configuration'
 require_relative 'indent'
 
-module Jekyll::Commands
+module EmbedCode
 
   # Splits the given file into fragments.
   #

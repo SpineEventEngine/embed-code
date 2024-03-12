@@ -26,21 +26,21 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_parse_from_xml
     xml = build_instruction 'org/example/Hello.java', 'Hello class'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     assert_not_nil(instruction)
   end
 
   def test_parse_with_closing_tag
     xml = build_instruction 'org/example/Hello.java', 'Hello class', nil, nil, true
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     assert_not_nil(instruction)
   end
 
   def test_read_fragment_dir
     xml = build_instruction 'org/example/Hello.java'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_not_nil(lines)
     assert_equal(28, lines.size)
@@ -50,21 +50,21 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_fragment_and_start
     xml = build_instruction 'org/example/Hello.java', 'fr1', 'public void hello()'
     assert_raise ArgumentError do
-      Jekyll::Commands::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
+      EmbedCode::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
     end
   end
 
   def test_fragment_and_end
     xml = build_instruction 'org/example/Hello.java', 'fr2', nil, '}'
     assert_raise ArgumentError do
-      Jekyll::Commands::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
+      EmbedCode::EmbeddingInstruction.from_xml(xml, config_with_prepared_fragments)
     end
   end
 
   def test_extract_by_glob
     xml = build_instruction 'org/example/Hello.java', nil, 'public class*', '*System.out*'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_not_nil(lines)
     assert_equal(4, lines.size)
@@ -75,7 +75,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_min_indentation
     xml = build_instruction 'org/example/Hello.java', nil, '*public static void main*', '*}*'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_not_nil(lines)
     assert_equal(3, lines.size)
@@ -88,7 +88,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_start_without_end
     xml = build_instruction 'org/example/Hello.java', nil, '*class*'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_not_nil(lines)
     assert_equal(6, lines.size)
@@ -98,7 +98,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_end_without_start
     xml = build_instruction 'org/example/Hello.java', nil, nil, 'package*'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_not_nil(lines)
     assert_equal(21, lines.size)
@@ -109,7 +109,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_one_line
     xml = build_instruction 'org/example/Hello.java', nil, '*main*', '*main*'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_not_nil(lines)
     assert_equal(1, lines.size)
@@ -119,7 +119,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_no_match_start
     xml = build_instruction 'org/example/Hello.java', nil, 'foo bar', '*main*'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     assert_raise do
       instruction.content
     end
@@ -128,7 +128,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_no_match_end
     xml = build_instruction 'org/example/Hello.java', nil, '*main*', 'foo bar'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     assert_raise do
       instruction.content
     end
@@ -137,7 +137,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_imply_asterisk
     xml = build_instruction 'org/example/Hello.java', nil, 'main', 'world'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_equal(2, lines.size)
     assert_true(lines.first.start_with?('public static void main'))
@@ -147,7 +147,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_explicit_line_start
     xml = build_instruction 'plain-text-to-embed.txt', nil, '^foo', '^bar'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_equal(4, lines.size)
     assert_equal("foo — this line starts with it\n", lines.first)
@@ -157,7 +157,7 @@ class EmbeddingInstructionTest < Test::Unit::TestCase
   def test_explicit_line_end
     xml = build_instruction 'plain-text-to-embed.txt', nil, 'foo$', 'bar$'
     configuration = config_with_prepared_fragments
-    instruction = Jekyll::Commands::EmbeddingInstruction.from_xml(xml, configuration)
+    instruction = EmbedCode::EmbeddingInstruction.from_xml(xml, configuration)
     lines = instruction.content
     assert_equal(6, lines.size)
     assert_equal("This line ends with foo\n", lines.first)

@@ -16,7 +16,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Jekyll::Commands
+module EmbedCode
 
   # An error produced when documentation files are not up-to-date with the code of examples.
   #

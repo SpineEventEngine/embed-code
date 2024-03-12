@@ -37,7 +37,7 @@ def config(prepared_fragments = false, code_includes = nil, doc_includes = nil)
   unless doc_includes.nil?
     yaml_like_hash['embed_code']['doc_includes'] = doc_includes
   end
-  Jekyll::Commands::Configuration.new(yaml_like_hash)
+  EmbedCode::Configuration.new(yaml_like_hash)
 end
 
 def prepare_docs(source)

@@ -34,14 +34,14 @@ class EmbeddingProcessorTest < Test::Unit::TestCase
   end
 
   def test_not_up_to_date
-    processor = Jekyll::Commands::EmbeddingProcessor.new(
+    processor = EmbedCode::EmbeddingProcessor.new(
       "#{@config.documentation_root}/whole-file-fragment.md", @config
     )
     assert !processor.up_to_date?
   end
 
   def test_up_to_date
-    processor = Jekyll::Commands::EmbeddingProcessor.new(
+    processor = EmbedCode::EmbeddingProcessor.new(
       "#{@config.documentation_root}/whole-file-fragment.md", @config
     )
     processor.embed
@@ -49,7 +49,7 @@ class EmbeddingProcessorTest < Test::Unit::TestCase
   end
 
   def test_nothing_to_update
-    processor = Jekyll::Commands::EmbeddingProcessor.new(
+    processor = EmbedCode::EmbeddingProcessor.new(
       "#{@config.documentation_root}/no-embedding-doc.md", @config
     )
     assert processor.up_to_date?

@@ -35,22 +35,22 @@ class CheckCodeSamplesTest < Test::Unit::TestCase
 
   def test_not_up_to_date
     @config = config(false, ['**/Hello.java'], ['**/doc.md'])
-    assert_raise Jekyll::Commands::UnexpectedDiffError do
-      Jekyll::Commands::CheckCodeSamples.process @config
+    assert_raise EmbedCode::UnexpectedDiffError do
+      EmbedCode::CheckCodeSamples.process @config
     end
   end
 
   def test_up_to_date
     @config = config(false, ['**/Hello.java'], ['**/already-embedded.md'])
     assert_nothing_raised do
-      Jekyll::Commands::CheckCodeSamples.process @config
+      EmbedCode::CheckCodeSamples.process @config
     end
   end
 
   def test_nothing_to_update
     @config = config(false, ['**/Hello.java'], ['**/no-embedding-doc.md'])
     assert_nothing_raised do
-      Jekyll::Commands::CheckCodeSamples.process @config
+      EmbedCode::CheckCodeSamples.process @config
     end
   end
 end

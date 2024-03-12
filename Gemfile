@@ -18,7 +18,6 @@
 
 source 'https://rubygems.org'
 
-gem 'jekyll', '~> 3.9'
 gem 'nokogiri', '~> 1.10'
 
 gem 'codecov', require: false, group: :test

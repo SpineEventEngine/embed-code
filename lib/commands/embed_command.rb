@@ -16,7 +16,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require('jekyll')
 require_relative('fragmentation')
 require_relative('embedding')
 require_relative('configuration')
@@ -25,18 +24,11 @@ require_relative('configuration')
 #   bundle exec jekyll embedCodeSamples
 #
 
-module Jekyll::Commands
+module EmbedCode
 
-  # Command which updates code embeddings in the documentation files.
-  class EmbedCodeSamples < Jekyll::Command
-
-    def self.init_with_program(prog)
-      prog.command(:embedCodeSamples) do |c|
-        c.description 'Embeds sample code into doc files.'
-        c.action { |_, __| process(Configuration.from_file) }
-      end
-    end
-
+  # Class which updates code embeddings in the documentation files.
+  class EmbedCodeSamples
+    
     def self.process(configuration)
       Fragmentation.write_fragment_files configuration
       EmbeddingProcessor.embed_all configuration

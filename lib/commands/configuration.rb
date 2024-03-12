@@ -16,9 +16,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'jekyll'
 
-module Jekyll::Commands
+module EmbedCode
   # The configuration of the plugin.
   #
   class Configuration
@@ -74,11 +73,6 @@ module Jekyll::Commands
       @doc_includes = (yaml['doc_includes'] or DEFAULT_DOC_INCLUDES)
       @fragments_dir = (yaml['fragments_dir'] or DEFAULT_FRAGMENTS_DIR)
       @separator = (yaml['separator'] or DEFAULT_SEPARATOR)
-    end
-
-    def self.from_file
-      yaml = Jekyll.configuration({})
-      @configuration = Configuration.new yaml
     end
   end
 end
