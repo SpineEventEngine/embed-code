@@ -3,11 +3,19 @@ To create .exe you should:
    ```bash
    ruby -v
    ```
-2. Install ocran (https://github.com/Largo/ocran) 
+2. Make sure you have bundle installed:
+   ```bash
+   gem install bundle
+   ```
+3. Install all dependencies
+   ```bash
+   bundle install
+   ```
+4. Install ocran (https://github.com/Largo/ocran) 
    ```bash
    gem install ocran
    ```
-3. Run 
+5. Run 
    ```bash
    ocran <scriptname>.rb
    ```
