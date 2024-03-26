@@ -20,7 +20,7 @@ jobs:
 
       - name: Run tests
         run: |
-          sudo chmod -R +rwx ./embed-code-go/
+          sudo chmod -R 777 ./embed-code-go/
           ls -l
           cd ./embed-code-go/
           go test -v ./...
