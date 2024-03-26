@@ -21,4 +21,5 @@ jobs:
       - name: Run tests
         run: |
           cd ./embed-code-go/
-          sudo go test -v ./...
+          chmod -R +rwx *
+          go test -v ./...
