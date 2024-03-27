@@ -67,3 +67,11 @@ _site/
 **/*.iml
 
 test/resources/.*
+
+# Used for embed-code-go.
+embed-code-go/build
+embed-code-go/test/resources/.*
+
+# Used for VSCode
+.vscode/launch.json
+.vscode/settings.json
