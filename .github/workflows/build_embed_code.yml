@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [ embed-code-go ]
 
+concurrency:
+  group: building
+  cancel-in-progress: true
+
 jobs:
 
   build:
