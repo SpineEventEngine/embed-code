@@ -35,11 +35,6 @@ jobs:
       run: |
         cd ./embed-code-go/
         go build -o ./bin/embed_code_${{ matrix.os }} ./embed_code.go
-
-    - name: List directory for debug
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        ls -l
         
     - name: Commit built files
       uses: EndBug/add-and-commit@v9
