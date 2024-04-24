@@ -69,7 +69,6 @@ _site/
 test/resources/.*
 
 # Used for embed-code-go.
-embed-code-go/build
 embed-code-go/test/resources/.*
 
 # Used for VSCode
