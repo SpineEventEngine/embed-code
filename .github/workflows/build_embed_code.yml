@@ -43,4 +43,3 @@ jobs:
         add: './embed-code-go/bin/embed_code_${{ matrix.os }}'
         message: 'Build embed_code.go for ${{ matrix.os }}'
         default_author: github_actions
-        push: origin ${{ github.ref }}
