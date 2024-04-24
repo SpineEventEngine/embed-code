@@ -30,7 +30,7 @@ jobs:
         go build -o ./bin/embed_code_${{ matrix.os }} ./embed_code.go
 
     - name: List directory for debug
-      if: runner.os == 'Ubuntu'
+      if: matrix.os == 'ubuntu-latest'
       run: |
         ls -l
         
