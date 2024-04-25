@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         
     steps:
     - uses: actions/checkout@v4
@@ -28,11 +28,23 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.22.1'
+
+    - name: List pre-build directory
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd ./embed-code-go/bin
+        ls -l *
         
     - name: Build embed_code.go
       run: |
         cd ./embed-code-go/
         go build -o ./bin/embed_code_${{ matrix.os }} ./embed_code.go
+
+    - name: List post-build directory
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd ./embed-code-go/bin
+        ls -l *
         
     - name: Commit built files
       uses: EndBug/add-and-commit@v9
