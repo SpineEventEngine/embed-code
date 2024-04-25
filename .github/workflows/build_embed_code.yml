@@ -38,7 +38,7 @@ jobs:
     - name: Build embed_code.go
       run: |
         cd ./embed-code-go/
-        go build -x -o ./bin/embed_code_${{ matrix.os }} ./embed_code.go
+        go build -v -o ./bin/embed_code_${{ matrix.os }} ./embed_code.go
 
     - name: List post-build directory
       if: matrix.os == 'ubuntu-latest'
