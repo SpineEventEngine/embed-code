@@ -19,6 +19,8 @@ jobs:
           go-version: '1.22.1'
 
       - name: Run tests
+        # Needs to have "-p 1" argument to run tests sequentially. It's because the tests
+        # create temporary files which can cause issues.  
         run: |
           cd ./embed-code-go/
           go test -v ./... -p 1
