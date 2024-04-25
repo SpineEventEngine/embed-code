@@ -38,7 +38,7 @@ jobs:
     - name: Remove File
       uses: JesseTG/rm@v1.0.3
       with:
-        path: ./bin/embed_code_${{ matrix.os }}
+        path: ./embed-code-go/bin/embed_code_${{ matrix.os }}
 
     - name: List post-removed directory
       if: matrix.os == 'ubuntu-latest'
