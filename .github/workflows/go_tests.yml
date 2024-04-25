@@ -1,4 +1,4 @@
-name: Tests for Go on Ubuntu
+name: Tests for Go
 
 on:
   pull_request:
@@ -7,8 +7,11 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v4
