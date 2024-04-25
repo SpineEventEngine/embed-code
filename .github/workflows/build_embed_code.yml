@@ -40,7 +40,7 @@ jobs:
       with:
         path: ./bin/embed_code_${{ matrix.os }}
 
-      - name: List post-removed directory
+    - name: List post-removed directory
       if: matrix.os == 'ubuntu-latest'
       run: |
         cd ./embed-code-go/bin
