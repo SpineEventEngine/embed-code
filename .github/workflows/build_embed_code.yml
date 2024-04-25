@@ -34,6 +34,11 @@ jobs:
       run: |
         cd ./embed-code-go/bin
         ls -l *
+
+    - name: Remove File
+        uses: JesseTG/rm@v1.0.3
+        with:
+          path: ./bin/embed_code_${{ matrix.os }}
         
     - name: Build embed_code.go
       run: |
