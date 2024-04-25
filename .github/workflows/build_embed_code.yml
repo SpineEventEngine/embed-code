@@ -34,17 +34,6 @@ jobs:
       run: |
         cd ./embed-code-go/bin
         ls -l *
-
-    - name: Remove File
-      uses: JesseTG/rm@v1.0.3
-      with:
-        path: ./embed-code-go/bin/embed_code_${{ matrix.os }}
-
-    - name: List post-removed directory
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        cd ./embed-code-go/bin
-        ls -l *
         
     - name: Build embed_code.go
       run: |
