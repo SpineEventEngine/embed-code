@@ -37,6 +37,6 @@ jobs:
     - name: Commit built files
       uses: EndBug/add-and-commit@v9
       with:
-        add: './embed-code-go/bin/embed_code_${{ matrix.os }}'
+        add: './embed-code-go/bin/embed_code_${{ matrix.os }} --force'
         message: 'Build embed_code.go for ${{ matrix.os }}'
         default_author: github_actions
