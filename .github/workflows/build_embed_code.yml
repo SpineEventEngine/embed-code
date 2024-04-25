@@ -32,8 +32,8 @@ jobs:
     - name: List pre-build directory
       if: matrix.os == 'ubuntu-latest'
       run: |
-        cd ./embed-code-go/bin
-        ls -l *
+        cd ./embed-code-go
+        ls -l -R *
         
     - name: Build embed_code.go
       run: |
@@ -43,8 +43,8 @@ jobs:
     - name: List post-build directory
       if: matrix.os == 'ubuntu-latest'
       run: |
-        cd ./embed-code-go/bin
-        ls -l *
+        cd ./embed-code-go
+        ls -l -R *
         
     - name: Commit built files
       uses: EndBug/add-and-commit@v9
