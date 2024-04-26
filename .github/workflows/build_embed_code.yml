@@ -31,8 +31,16 @@ jobs:
         
     - name: Build embed_code.go
       run: |
-        cd ./embed-code-go/
-        go build -o ./bin/embed_code_${{ matrix.os }} ./embed_code.go
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          cd ./embed-code-go/
+          go build -o ./bin/embed-code-win.exe ./embed_code.go
+        elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          cd ./embed-code-go/
+          go build -o ./bin/embed-code-ubuntu ./embed_code.go
+        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+          cd ./embed-code-go/
+          go build -o ./bin/embed-code-macos ./embed_code.go
+        fi
         
     - name: Commit built files
       uses: EndBug/add-and-commit@v9
