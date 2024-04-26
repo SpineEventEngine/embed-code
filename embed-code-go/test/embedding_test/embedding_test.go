@@ -21,114 +21,14 @@ package embedding_test
 import (
 	"embed-code/embed-code-go/configuration"
 	"embed-code/embed-code-go/embedding"
+	"embed-code/embed-code-go/test/filesystem"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
-
-// Removes directory and all it's subdirectories if exists, does nothing if not exists.
-func cleanupDir(dir string) {
-	if _, err := os.Stat(dir); err == nil {
-		err = os.RemoveAll(dir)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-// Copies directory from source path to target path with all subdirs and children.
-func copyDirRecursive(source string, target string) {
-	info, err := os.Stat(source)
-	if err != nil {
-		panic(err)
-	}
-
-	err = os.MkdirAll(target, info.Mode())
-	if err != nil {
-		panic(err)
-	}
-
-	entries, err := os.ReadDir(source)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, entry := range entries {
-		sourcePath := filepath.Join(source, entry.Name())
-		targetPath := filepath.Join(target, entry.Name())
-
-		if entry.IsDir() {
-			copyDirRecursive(sourcePath, targetPath)
-		} else {
-			err = copyFile(sourcePath, targetPath)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-}
-
-func copyFile(source string, target string) (err error) {
-	sourceFile, err := os.Open(source)
-	if err != nil {
-		return
-	}
-	defer sourceFile.Close()
-
-	targetFile, err := os.Create(target)
-	if err != nil {
-		return
-	}
-	defer func() {
-		cerr := targetFile.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-
-	if _, err = io.Copy(targetFile, sourceFile); err != nil {
-		return
-	}
-
-	err = os.Chmod(target, os.FileMode(0666))
-	return
-}
-
-type EmbeddingInstructionTestsPreparator struct {
-	rootDir  string
-	testsDir string
-}
-
-func newEmbeddingInstructionTestsPreparator() EmbeddingInstructionTestsPreparator {
-	rootDir, err := filepath.Abs("../../")
-	if err != nil {
-		panic(err)
-	}
-	testsDir, err := filepath.Abs(".")
-	if err != nil {
-		panic(err)
-	}
-	return EmbeddingInstructionTestsPreparator{
-		rootDir:  rootDir,
-		testsDir: testsDir,
-	}
-}
-
-func (testPreparator EmbeddingInstructionTestsPreparator) setup() {
-	config := buildConfigWithPreparedFragments()
-	os.Chdir(testPreparator.rootDir)
-	copyDirRecursive("./test/resources/docs", config.DocumentationRoot)
-}
-
-func (testPreparator EmbeddingInstructionTestsPreparator) cleanup() {
-	config := buildConfigWithPreparedFragments()
-	cleanupDir(config.DocumentationRoot)
-	os.Chdir(testPreparator.testsDir)
-}
 
 func buildConfigWithPreparedFragments() configuration.Configuration {
 	var config = configuration.NewConfiguration()
@@ -138,51 +38,53 @@ func buildConfigWithPreparedFragments() configuration.Configuration {
 	return config
 }
 
-func TestNotUpToDate(t *testing.T) {
-	preparator := newEmbeddingInstructionTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
-
-	config := buildConfigWithPreparedFragments()
-	docPath := fmt.Sprintf("%s/whole-file-fragment.md", config.DocumentationRoot)
-	processor := embedding.NewEmbeddingProcessor(docPath, config)
-
-	isUpToDate := processor.IsUpToDate()
-	assert.False(t, isUpToDate)
+type EmbeddingTestSuite struct {
+	suite.Suite
+	config configuration.Configuration
 }
 
-func TestUpToDate(t *testing.T) {
-	preparator := newEmbeddingInstructionTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
+func (suite *EmbeddingTestSuite) SetupSuite() {
+	rootDir, err := filepath.Abs("../../")
+	if err != nil {
+		panic(err)
+	}
+	os.Chdir(rootDir)
+	suite.config = buildConfigWithPreparedFragments()
+}
 
-	config := buildConfigWithPreparedFragments()
-	docPath := fmt.Sprintf("%s/whole-file-fragment.md", config.DocumentationRoot)
-	processor := embedding.NewEmbeddingProcessor(docPath, config)
+func (suite *EmbeddingTestSuite) SetupTest() {
+	filesystem.CopyDirRecursive("./test/resources/docs", suite.config.DocumentationRoot)
+}
+
+func (suite *EmbeddingTestSuite) TearDownTest() {
+	filesystem.CleanupDir(suite.config.DocumentationRoot)
+}
+
+func (suite *EmbeddingTestSuite) TestNotUpToDate() {
+	docPath := fmt.Sprintf("%s/whole-file-fragment.md", suite.config.DocumentationRoot)
+	processor := embedding.NewEmbeddingProcessor(docPath, suite.config)
+
+	isUpToDate := processor.IsUpToDate()
+	suite.False(isUpToDate)
+}
+
+func (suite *EmbeddingTestSuite) TestUpToDate() {
+	docPath := fmt.Sprintf("%s/whole-file-fragment.md", suite.config.DocumentationRoot)
+	processor := embedding.NewEmbeddingProcessor(docPath, suite.config)
 	processor.Embed()
 
 	isUpToDate := processor.IsUpToDate()
-	assert.True(t, isUpToDate)
+	suite.True(isUpToDate)
 }
 
-func TestNothingToUpdate(t *testing.T) {
-	preparator := newEmbeddingInstructionTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
-
-	config := buildConfigWithPreparedFragments()
-	docPath := fmt.Sprintf("%s/no-embedding-doc.md", config.DocumentationRoot)
-	processor := embedding.NewEmbeddingProcessor(docPath, config)
-	assert.True(t, processor.IsUpToDate())
+func (suite *EmbeddingTestSuite) TestNothingToUpdate() {
+	docPath := fmt.Sprintf("%s/no-embedding-doc.md", suite.config.DocumentationRoot)
+	processor := embedding.NewEmbeddingProcessor(docPath, suite.config)
+	suite.True(processor.IsUpToDate())
 }
 
-func TestFalseTransitions(t *testing.T) {
-	preparator := newEmbeddingInstructionTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
-
-	config := buildConfigWithPreparedFragments()
-	docPath := fmt.Sprintf("%s/split-lines.md", config.DocumentationRoot)
+func (suite *EmbeddingTestSuite) TestFalseTransitions() {
+	docPath := fmt.Sprintf("%s/split-lines.md", suite.config.DocumentationRoot)
 
 	falseTransitions := map[string][]string{
 		"START":                 {"REGULAR_LINE", "FINISH", "EMBEDDING_INSTRUCTION"},
@@ -194,23 +96,22 @@ func TestFalseTransitions(t *testing.T) {
 		"CODE_FENCE_END":        {"FINISH", "EMBEDDING_INSTRUCTION", "REGULAR_LINE"},
 	}
 
-	falseProcessor := embedding.NewEmbeddingProcessorWithTransitions(docPath, config, falseTransitions)
+	falseProcessor := embedding.NewEmbeddingProcessorWithTransitions(docPath, suite.config, falseTransitions)
 
-	assert.Panics(t, assert.PanicTestFunc(func() {
+	suite.Require().Panics(func() {
 		falseProcessor.Embed()
-	}))
+	})
 }
 
-func TestMultiLinedTag(t *testing.T) {
-	preparator := newEmbeddingInstructionTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
-
-	config := buildConfigWithPreparedFragments()
-	docPath := fmt.Sprintf("%s/multi-lined-tag.md", config.DocumentationRoot)
-	processor := embedding.NewEmbeddingProcessor(docPath, config)
+func (suite *EmbeddingTestSuite) TestMultiLinedTag() {
+	docPath := fmt.Sprintf("%s/multi-lined-tag.md", suite.config.DocumentationRoot)
+	processor := embedding.NewEmbeddingProcessor(docPath, suite.config)
 	processor.Embed()
 
 	isUpToDate := processor.IsUpToDate()
-	assert.True(t, isUpToDate)
+	suite.True(isUpToDate)
+}
+
+func TestEmbeddingTestSuite(t *testing.T) {
+	suite.Run(t, new(EmbeddingTestSuite))
 }

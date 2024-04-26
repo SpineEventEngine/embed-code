@@ -1,0 +1,29 @@
+name: Tests for Go
+
+on:
+  pull_request:
+    branches:
+      - embed-code-go
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Run tests
+        # Needs to have "-p 1" argument to run tests sequentially. It's because the tests
+        # create temporary files which can cause issues.  
+        run: |
+          cd ./embed-code-go/
+          go test -v ./... -p 1

@@ -1,124 +1,35 @@
+// Copyright 2024, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 package cli_test
 
 import (
 	"embed-code/embed-code-go/cli"
 	"embed-code/embed-code-go/configuration"
+	"embed-code/embed-code-go/test/filesystem"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
-
-// Removes directory and all its subdirectories if exists, does nothing if not exists.
-//
-// dir_path — a path (full or relative) of the directory to be removed.
-func cleanupDir(dir_path string) {
-	if _, err := os.Stat(dir_path); err == nil {
-		err = os.RemoveAll(dir_path)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-// Copies directory from source path to target path with all subdirs and children.
-//
-// source_dir_path — a path (full or relative) of the directory to be copied.
-//
-// target_dir_path — a path (full or relative) of the directory to be copied to.
-func copyDirRecursive(source_dir_path string, target_dir_path string) {
-	info, err := os.Stat(source_dir_path)
-	if err != nil {
-		panic(err)
-	}
-
-	err = os.MkdirAll(target_dir_path, info.Mode())
-	if err != nil {
-		panic(err)
-	}
-
-	entries, err := os.ReadDir(source_dir_path)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, entry := range entries {
-		sourcePath := filepath.Join(source_dir_path, entry.Name())
-		targetPath := filepath.Join(target_dir_path, entry.Name())
-
-		if entry.IsDir() {
-			copyDirRecursive(sourcePath, targetPath)
-		} else {
-			err = copyFile(sourcePath, targetPath)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-}
-
-// Copies file from source_file_path to target_file_path.
-func copyFile(source_file_path string, target_file_path string) (err error) {
-	sourceFile, err := os.Open(source_file_path)
-	if err != nil {
-		return
-	}
-	defer sourceFile.Close()
-
-	targetFile, err := os.Create(target_file_path)
-	if err != nil {
-		return
-	}
-	defer func() {
-		cerr := targetFile.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-
-	if _, err = io.Copy(targetFile, sourceFile); err != nil {
-		return
-	}
-
-	err = os.Chmod(target_file_path, os.FileMode(0666))
-	return
-}
-
-type TestsPreparator struct {
-	rootDir  string
-	testsDir string
-}
-
-func newTestsPreparator() TestsPreparator {
-	rootDir, err := filepath.Abs("../../")
-	if err != nil {
-		panic(err)
-	}
-	testsDir, err := filepath.Abs(".")
-	if err != nil {
-		panic(err)
-	}
-	return TestsPreparator{
-		rootDir:  rootDir,
-		testsDir: testsDir,
-	}
-}
-
-func (testPreparator TestsPreparator) setup() {
-	config := buildConfig()
-	os.Chdir(testPreparator.rootDir)
-	copyDirRecursive("./test/resources/docs", config.DocumentationRoot)
-}
-
-func (testPreparator TestsPreparator) cleanup() {
-	config := buildConfig()
-	cleanupDir(config.DocumentationRoot)
-	cleanupDir(config.FragmentsDir)
-	os.Chdir(testPreparator.testsDir)
-}
 
 func buildConfig() configuration.Configuration {
 	var config = configuration.NewConfiguration()
@@ -127,54 +38,71 @@ func buildConfig() configuration.Configuration {
 	return config
 }
 
-func TestEmbedding(t *testing.T) {
-	preparator := newTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
+type CLITestSuite struct {
+	suite.Suite
+	config configuration.Configuration
+}
 
-	config := buildConfig()
+func (suite *CLITestSuite) SetupSuite() {
+	rootDir, err := filepath.Abs("../../")
+	if err != nil {
+		panic(err)
+	}
+	os.Chdir(rootDir)
+	suite.config = buildConfig()
+}
 
-	assert.Panics(t, assert.PanicTestFunc(func() {
-		cli.CheckCodeSamples(config)
+func (suite *CLITestSuite) SetupTest() {
+	filesystem.CopyDirRecursive("./test/resources/docs", suite.config.DocumentationRoot)
+}
+
+func (suite *CLITestSuite) TearDownTest() {
+	filesystem.CleanupDir(suite.config.DocumentationRoot)
+	filesystem.CleanupDir(suite.config.FragmentsDir)
+}
+
+func (suite *CLITestSuite) TestEmbedding() {
+	suite.Panics(assert.PanicTestFunc(func() {
+		cli.CheckCodeSamples(suite.config)
 	}))
 
-	cli.EmbedCodeSamples(config)
+	cli.EmbedCodeSamples(suite.config)
 
-	assert.NotPanics(t, assert.PanicTestFunc(func() {
-		cli.CheckCodeSamples(config)
+	suite.NotPanics(assert.PanicTestFunc(func() {
+		cli.CheckCodeSamples(suite.config)
 	}))
 }
 
-func TestRequiredArgsFilled(t *testing.T) {
+func (suite *CLITestSuite) TestRequiredArgsFilled() {
 	args := cli.Args{
 		DocsRoot: "docs",
 		CodeRoot: "code",
 		Mode:     "embed",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "", validation_message)
+	suite.Equal("", validation_message)
 }
 
-func TestModeMissed(t *testing.T) {
+func (suite *CLITestSuite) TestModeMissed() {
 	args := cli.Args{
 		DocsRoot: "docs",
 		CodeRoot: "code",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "Mode must be set.", validation_message)
+	suite.Equal("Mode must be set.", validation_message)
 }
 
-func TestDocsRootMissed(t *testing.T) {
+func (suite *CLITestSuite) TestDocsRootMissed() {
 	args := cli.Args{
 		CodeRoot: "code",
 		Mode:     "embed",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "If one of code_root and docs_root is set, the another one must be set as well.",
+	suite.Equal("If one of code_root and docs_root is set, the another one must be set as well.",
 		validation_message)
 }
 
-func TestConfigAndRootDirsSet(t *testing.T) {
+func (suite *CLITestSuite) TestConfigAndRootDirsSet() {
 	args := cli.Args{
 		CodeRoot:       "code",
 		DocsRoot:       "docs",
@@ -182,50 +110,46 @@ func TestConfigAndRootDirsSet(t *testing.T) {
 		ConfigFilePath: "config.yaml",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "Config path cannot be set when code_root, docs_root or optional params are set.",
+	suite.Equal("Config path cannot be set when code_root, docs_root or optional params are set.",
 		validation_message)
 }
 
-func TestCorrectConfigFile(t *testing.T) {
-	preparator := newTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
-
+func (suite *CLITestSuite) TestCorrectConfigFile() {
 	args := cli.Args{
 		Mode:           "embed",
 		ConfigFilePath: "./test/resources/config_files/correct_config.yml",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "", validation_message)
+	suite.Equal("", validation_message)
 
 	config_file_validation_message := cli.ValidateConfigFile(args.ConfigFilePath)
-	assert.Equal(t, "", config_file_validation_message)
+	suite.Equal("", config_file_validation_message)
 }
 
-func TestConfigFileNotExist(t *testing.T) {
+func (suite *CLITestSuite) TestConfigFileNotExist() {
 	args := cli.Args{
 		Mode:           "embed",
 		ConfigFilePath: "/some/path/to/config.yaml",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "", validation_message)
+	suite.Equal("", validation_message)
 
 	config_file_validation_message := cli.ValidateConfigFile(args.ConfigFilePath)
-	assert.Equal(t, fmt.Sprintf("The file %s is not exists.", args.ConfigFilePath), config_file_validation_message)
+	suite.Equal(fmt.Sprintf("The file %s is not exists.", args.ConfigFilePath), config_file_validation_message)
 }
 
-func TestConfigFileWithoutDocsRoot(t *testing.T) {
-	preparator := newTestsPreparator()
-	preparator.setup()
-	defer preparator.cleanup()
-
+func (suite *CLITestSuite) TestConfigFileWithoutDocsRoot() {
 	args := cli.Args{
 		Mode:           "embed",
 		ConfigFilePath: "./test/resources/config_files/config_without_docs_root.yml",
 	}
 	validation_message := cli.Validate(args)
-	assert.Equal(t, "", validation_message)
+	suite.Equal("", validation_message)
 
 	config_file_validation_message := cli.ValidateConfigFile(args.ConfigFilePath)
-	assert.Equal(t, "Config must include both code_root and docs_root fields.", config_file_validation_message)
+	suite.Equal("Config must include both code_root and docs_root fields.", config_file_validation_message)
+}
+
+func TestCLITestSuite(t *testing.T) {
+	suite.Run(t, new(CLITestSuite))
 }

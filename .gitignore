@@ -70,6 +70,7 @@ test/resources/.*
 
 # Used for embed-code-go.
 embed-code-go/test/resources/.*
+embed-code-go/build
 
 # Used for VSCode
 .vscode/launch.json
