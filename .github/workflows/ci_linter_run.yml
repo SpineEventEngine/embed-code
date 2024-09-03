@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - embed-code-go
+  push:
+    branches:
+      - embed-code-go-add-linter
 
 jobs:
   build:
