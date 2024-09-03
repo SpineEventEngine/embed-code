@@ -1,0 +1,24 @@
+name: Check Golang code with linter
+
+on:
+  pull_request:
+    branches:
+      - embed-code-go
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Install golangci-linter
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.60.3
+
+      - name: Verify installation
+        run: golangci-lint --version
+
+      - name: Run linters
+        run: golangci-lint run ./embed-code-go/
