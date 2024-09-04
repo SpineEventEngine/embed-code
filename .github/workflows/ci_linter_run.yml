@@ -28,4 +28,5 @@ jobs:
 
       - name: Run linters
         run: |
-          golangci-lint run ./... --config ./.github/golangci.yml
+          cd ./embed-code-go/
+          golangci-lint run
