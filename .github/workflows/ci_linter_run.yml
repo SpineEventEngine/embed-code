@@ -24,4 +24,6 @@ jobs:
         run: golangci-lint --version
 
       - name: Run linters
-        run: golangci-lint run ./embed-code-go/
+        run: |
+          cd ./embed-code-go/
+          golangci-lint run
