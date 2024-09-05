@@ -10,6 +10,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./embed-code-go/
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -26,6 +30,4 @@ jobs:
         run: golangci-lint --version
 
       - name: Run linters
-        run: |
-          cd ./embed-code-go/
-          golangci-lint run
+        run: golangci-lint run
