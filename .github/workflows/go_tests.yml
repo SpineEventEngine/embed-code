@@ -4,13 +4,15 @@ on:
   pull_request:
     branches:
       - embed-code-go
-      # Temporary change to run tests on PR #45. Will be removed before merge.
-      - embed-code-go-add-linter
 
 jobs:
   build:
     if: github.actor != 'github-actions[bot]'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./embed-code-go/
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
@@ -26,6 +28,4 @@ jobs:
       - name: Run tests
         # Needs to have "-p 1" argument to run tests sequentially. It's because the tests
         # create temporary files which can cause issues.  
-        run: |
-          cd ./embed-code-go/
-          go test -v ./... -p 1
+        run: go test -v ./... -p 1
