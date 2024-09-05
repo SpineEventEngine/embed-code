@@ -9,6 +9,7 @@ jobs:
   build:
     if: github.actor != 'github-actions[bot]'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
