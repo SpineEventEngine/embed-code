@@ -14,6 +14,9 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./embed-code-go/
     strategy:
       max-parallel: 1
       matrix:
@@ -32,21 +35,15 @@ jobs:
         
     - name: Build embed_code.go for Windows
       if: matrix.os == 'windows-latest'
-      run: |
-          cd ./embed-code-go/
-          go build -o ./bin/embed-code-win.exe ./embed_code.go
+      run: go build -o ./bin/embed-code-win.exe ./embed_code.go
     
     - name: Build embed_code.go for Ubuntu
       if: matrix.os == 'ubuntu-latest'
-      run: |
-        cd ./embed-code-go/
-        go build -o ./bin/embed-code-ubuntu ./embed_code.go
+      run: go build -o ./bin/embed-code-ubuntu ./embed_code.go
 
     - name: Build embed_code.go for MacOS
       if: matrix.os == 'macos-latest'
-      run: |
-        cd ./embed-code-go/
-        go build -o ./bin/embed-code-macos ./embed_code.go
+      run: go build -o ./bin/embed-code-macos ./embed_code.go
         
     - name: Commit built files
       uses: EndBug/add-and-commit@v9
