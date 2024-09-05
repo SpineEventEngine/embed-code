@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - embed-code-go
-      # Temporary change to enable linters on PR #45. Will be removed before merge.
-      - embed-code-go-add-linter
 
 jobs:
   build:
