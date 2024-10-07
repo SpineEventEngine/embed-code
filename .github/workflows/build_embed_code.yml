@@ -2,7 +2,7 @@ name: Build_and_Commit_Embed_Code
 
 on:
   workflow_run:
-    workflows: ["Tests-for-Go"]
+    workflows: ["Tests for Go"]
     types:
       - completed
 
