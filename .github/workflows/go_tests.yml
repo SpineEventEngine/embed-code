@@ -1,4 +1,4 @@
-name: Tests_for_Go
+name: Tests for Go
 
 on:
   pull_request:
