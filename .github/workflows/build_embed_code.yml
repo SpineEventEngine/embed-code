@@ -1,8 +1,10 @@
 name: Build and Commit Embed Code
 
 on:
-  pull_request:
-    branches: [ embed-code-go ]
+  workflow_run:
+    workflows: ["Tests for Go"]
+    types:
+      - completed
 
 concurrency:
   group: building
