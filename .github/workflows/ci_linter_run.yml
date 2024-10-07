@@ -1,4 +1,4 @@
-name: Check Golang code with linter
+name: Check_Golang_code_with_linter
 
 on:
   pull_request:

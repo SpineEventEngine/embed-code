@@ -1,4 +1,4 @@
-name: Build and Commit Embed Code
+name: Build_and_Commit_Embed_Code
 
 on:
   workflow_run:
