@@ -5,7 +5,6 @@ on:
     branches: [ embed-code-go ]
   push:
     branches: [ support-nested-dirs ]
-
 concurrency:
   group: building
   cancel-in-progress: true
