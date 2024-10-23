@@ -3,8 +3,7 @@ name: Build and Commit Embed Code
 on:
   pull_request:
     branches: [ embed-code-go ]
-  push:
-    branches: [ support-nested-dirs ]
+
 concurrency:
   group: building
   cancel-in-progress: true
