@@ -43,6 +43,9 @@ jobs:
 
     - name: Build embed_code.go for MacOS
       if: matrix.os == 'macos-latest'
+      env:
+        GOOS: darwin
+        GOARCH: amd64
       run: go build -o ./bin/embed-code-macos ./main.go
         
     - name: Commit built files
