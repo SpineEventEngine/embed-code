@@ -1,3 +1,8 @@
+# Notice
+
+This repository contains the embed-code Ruby implementation for Jekyll which will not be supported anymore. 
+The current Go implementation is available in the [SpineEventEngine/embed-code-go repository](https://github.com/SpineEventEngine/embed-code-go) repository.
+
 # embed-code
 
 This is a Jekyll [subcommand](https://jekyllrb.com/docs/plugins/commands/) that embeds code samples
